@@ -1,0 +1,1 @@
+Jenkins.instance.getItemByFullName("nom_du_job").removeParameter(Jenkins.instance.getItemByFullName("nom_du_job").getProperty(hudson.model.ParametersDefinitionProperty.class).getParameterDefinition("nom_du_paramètre"))
