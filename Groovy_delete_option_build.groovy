@@ -1,1 +1,4 @@
-Jenkins.instance.getItem("test-mvn").getProperty(ParametersDefinitionProperty.class).getParameterDefinition("toto").delete()
+def job = Jenkins.instance.getItem("test-mvn")
+def params = job.getProperty(ParametersDefinitionProperty.class)
+params.getParameterDefinition("toto").delete()
+job.save()
