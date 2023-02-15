@@ -1,15 +1,34 @@
 #!/bin/bash
 
-# Variables d'authentification
-CLUSTER_ENDPOINT="https://toto.group:8080"
-USERNAME="votre_id"
-PASSWORD="votre_mot_de_passe"
-NAMESPACE="ilyes-test"
+# Définir les arguments en ligne de commande
+while getopts ":u:p:" opt; do
+  case $opt in
+    u) username="$OPTARG"
+    ;;
+    p) password="$OPTARG"
+    ;;
+    \?) echo "Option invalide -$OPTARG" >&2
+    ;;
+  esac
+done
 
-# Se connecter et récupérer le token d'authentification
-TOKEN=$(curl -s -k -H "Content-Type: application/json" -X POST --data '{"username":"'$USERNAME'","password":"'$PASSWORD'"}' $CLUSTER_ENDPOINT/authenticate | jq -r '.token')
+# Vérifier si les arguments obligatoires ont été fournis
+if [ -z "$username" ] || [ -z "$password" ]; then
+  echo "Veuillez spécifier un nom d'utilisateur et un mot de passe valides."
+  exit 1
+fi
 
-# Configurer kubectl pour utiliser le token d'authentification
-kubectl config set-credentials $USERNAME --token=$TOKEN
-kubectl config set-context $USERNAME --user=$USERNAME --cluster=$CLUSTER_ENDPOINT --namespace=$NAMESPACE
-kubectl config use-context $USERNAME
+# Récupérer le token d'authentification
+token=$(echo -n "$username:$password" | base64)
+cluster_url="https://<your_cluster_url>"
+cluster_name="<your_cluster_name>"
+user_name="<your_user_name>"
+namespace_name="ilyes-test"
+
+# Configurer l'authentification du client vers le cluster
+kubectl config set-cluster $cluster_name --server=$cluster_url --insecure-skip-tls-verify=true
+kubectl config set-credentials $user_name --token=$token
+kubectl config set-context $cluster_name --cluster=$cluster_name --user=$user_name --namespace=$namespace_name
+kubectl config use-context $cluster_name
+
+echo "L'authentification du client a été configurée avec succès pour le cluster $cluster_name et le namespace $namespace_name."
