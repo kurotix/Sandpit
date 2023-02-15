@@ -1,2 +1,1 @@
-Jenkins.instance.getItemByFullName("nom_du_job").removeParameter("nom_du_paramètre")
-
+Jenkins.instance.getItem("test-mvn").getProperty(ParametersDefinitionProperty.class).getParameterDefinition("toto").delete()
