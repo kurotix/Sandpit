@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Récupération des arguments en ligne de commande
+output=$1
+username=$2
+password=$3
+
+# Vérification si la VM est accessible via ping
+if ping -q -c 1 $output >/dev/null; then
+  echo "VM est disponible. Connexion en cours ..."
+
+  # Connexion WinRM à la VM via winrm
+  winrm -r https://$output:5986 -u:$username -p:$password "echo 'Connexion WinRM établie avec succès.'"
+else
+  echo "VM est inaccessible."
+fi
