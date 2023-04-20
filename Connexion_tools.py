@@ -1,5 +1,6 @@
 import requests
 import json
+from base64 import b64encode
 
 # Définir les informations d'authentification
 username = input("Entrez votre nom d'utilisateur : ")
