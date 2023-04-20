@@ -1,4 +1,8 @@
 import requests
+from urllib3.exceptions import InsecureRequestWarning
+
+# Désactiver les avertissements SSL
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 # URL pour générer un token utilisateur
 auth_url = "https://toto/api/v1/tokens/generate"
@@ -11,7 +15,7 @@ password = input("Entrez votre mot de passe : ")
 auth = (username, password)
 
 # Effectuer la demande POST pour générer un token
-response = requests.post(auth_url, auth=auth)
+response = requests.post(auth_url, auth=auth, verify=False)
 
 # Vérifier que la demande a été réussie
 if response.status_code == 200:
@@ -25,7 +29,7 @@ if response.status_code == 200:
     headers = {"Authorization": f"Bearer {token}"}
 
     # Effectuer la demande GET
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=False)
 
     # Vérifier que la demande a été réussie
     if response.status_code == 200:
