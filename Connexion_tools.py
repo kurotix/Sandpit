@@ -1,6 +1,5 @@
 import requests
 import json
-from base64 import b64encode
 
 # Définir les informations d'authentification
 username = input("Entrez votre nom d'utilisateur : ")
@@ -18,19 +17,30 @@ auth_data = {
 # Envoyer la requête POST pour générer un token
 response = requests.post(token_url, data=auth_data, verify="certif.crt")
 
-# Extraire le token du JSON de réponse
-token = response.json()["access_token"]
-
-# Définir les en-têtes pour la demande GET avec le token d'authentification
-headers = {
-    "Authorization": f"Bearer {token}"
-}
-
-# URL pour la demande GET avec le token d'authentification
-builds_url = "https://toto/api/v1/builds/16463"
-
-# Envoyer la demande GET avec le token d'authentification
-response = requests.get(builds_url, headers=headers, verify="certif.crt")
-
-# Afficher la réponse JSON de la demande GET
-print(json.dumps(response.json(), indent=2))
+# Vérifier le statut de la réponse
+if response.status_code == 200:
+    # Récupérer le token dans le corps de la réponse JSON
+    token = response.json()["access_token"]
+    
+    # URL pour obtenir les informations de builds
+    builds_url = "https://toto/api/v1/builds/16463"
+    
+    # Créer les en-têtes pour inclure le token d'authentification
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    
+    # Envoyer la requête GET pour obtenir les informations de builds
+    builds_response = requests.get(builds_url, headers=headers, verify="certif.crt")
+    
+    # Vérifier le statut de la réponse
+    if builds_response.status_code == 200:
+        # Afficher le contenu de la réponse JSON
+        print(json.dumps(builds_response.json(), indent=2))
+        print("test DIM ok")
+    else:
+        # Afficher un message d'erreur
+        print("Erreur lors de la récupération des informations de builds")
+else:
+    # Afficher un message d'erreur
+    print("Erreur lors de la génération du token")    
