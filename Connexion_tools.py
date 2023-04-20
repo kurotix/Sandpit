@@ -3,8 +3,12 @@ import requests
 # URL pour générer un token utilisateur
 auth_url = "https://toto/api/v1/tokens/generate"
 
+# Demander à l'utilisateur d'entrer son nom d'utilisateur et son mot de passe
+username = input("Entrez votre nom d'utilisateur : ")
+password = input("Entrez votre mot de passe : ")
+
 # Définir les informations d'authentification
-auth = ("coco", "fifi")
+auth = (username, password)
 
 # Effectuer la demande POST pour générer un token
 response = requests.post(auth_url, auth=auth)
