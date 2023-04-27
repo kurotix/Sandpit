@@ -13,8 +13,10 @@ url = 'https://toto.fr'
 # Établir une session pour conserver les cookies de connexion
 session = requests.Session()
 
-# Charger le certificat dans la session
-session.verify = cert_file
+# Charger le certificat dans la session en tant qu'objet bytes
+with open(cert_file, 'rb') as f:
+    cert_bytes = f.read()
+session.verify = cert_bytes
 
 # Authentification en envoyant la demande de connexion
 session.post(url + '/login', data={'username': username, 'password': password})
