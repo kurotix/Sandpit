@@ -1,7 +1,6 @@
+import os
 import requests
-
-# Spécifiez le chemin d'accès au certificat
-cert_file = 'toto.crt'
+import certifi
 
 # Les informations d'identification pour se connecter au site Web
 username = 'kurotix'
@@ -13,10 +12,11 @@ url = 'https://toto.fr'
 # Établir une session pour conserver les cookies de connexion
 session = requests.Session()
 
-# Charger le certificat dans la session en tant qu'objet bytes
-with open(cert_file, 'rb') as f:
-    cert_bytes = f.read()
-session.verify = cert_bytes
+# Charger le bundle de certificats de confiance de certifi
+cafile = certifi.where()
+
+# Définir la variable d'environnement REQUESTS_CA_BUNDLE sur le chemin d'accès du bundle de certificats
+os.environ['REQUESTS_CA_BUNDLE'] = cafile
 
 # Authentification en envoyant la demande de connexion
 session.post(url + '/login', data={'username': username, 'password': password})
