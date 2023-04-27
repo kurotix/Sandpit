@@ -1,37 +1,42 @@
 import requests
-from bs4 import BeautifulSoup
 
-# Créer une session pour maintenir l'état de connexion
+# Spécifiez le chemin d'accès au certificat
+cert_file = 'toto.crt'
+
+# Les informations d'identification pour se connecter au site Web
+username = 'kurotix'
+password = 'toto78'
+
+# L'URL du site Web
+url = 'https://toto.fr'
+
+# Établir une session pour conserver les cookies de connexion
 session = requests.Session()
 
-# Se connecter et accéder à la page de téléchargement
-login_url = "https://toto.fr/login"
-download_url = "https://toto.fr/visuel"
-username = "kurotix"
-password = "toto78"
+# Charger le certificat dans la session
+session.verify = cert_file
 
-# Récupérer le token CSRF
-login_response = session.get(login_url)
-soup = BeautifulSoup(login_response.content, "html.parser")
-csrf_token = soup.find("input", {"name": "csrf_token"})["value"]
+# Authentification en envoyant la demande de connexion
+session.post(url + '/login', data={'username': username, 'password': password})
 
-# Soumettre le formulaire de connexion
-payload = {
-    "username": username,
-    "password": password,
-    "csrf_token": csrf_token
-}
+# Accédez à la page de téléchargement
+response = session.get(url + '/visuel')
 
-session.post(login_url, data=payload)
+# Vérifier si la page a été chargée avec succès
+if response.status_code == 200:
+    # Extraire le jeton CSRF du contenu HTML de la page
+    csrf_token = response.content.split('csrf_token')[1].split('value="')[1].split('"')[0]
 
-# Télécharger le fichier JSON
-download_response = session.get(download_url)
+    # Construire la demande de téléchargement JSON en incluant le jeton CSRF
+    download_request = {'csrf_token': csrf_token}
 
-# Vérifier si le téléchargement est réussi
-if download_response.status_code == 200:
-    # Enregistrer le fichier JSON
-    with open("report.json", "wb") as f:
-        f.write(download_response.content)
-    print("ok")
+    # Envoyer la demande de téléchargement JSON en simulant le clic sur le bouton "Download Report"
+    download_response = session.post(url + '/download', data=download_request)
+
+    # Vérifier si le téléchargement a réussi
+    if download_response.status_code == 200:
+        print('Téléchargement réussi !')
+    else:
+        print('Le téléchargement a échoué.')
 else:
-    print("non ok")
+    print('La page de téléchargement n\'a pas pu être chargée.')
