@@ -1,6 +1,4 @@
-import os
 import requests
-import certifi
 
 # Les informations d'identification pour se connecter au site Web
 username = 'kurotix'
@@ -12,17 +10,11 @@ url = 'https://toto.fr'
 # Établir une session pour conserver les cookies de connexion
 session = requests.Session()
 
-# Charger le bundle de certificats de confiance de certifi
-cafile = certifi.where()
-
-# Définir la variable d'environnement REQUESTS_CA_BUNDLE sur le chemin d'accès du bundle de certificats
-os.environ['REQUESTS_CA_BUNDLE'] = cafile
-
 # Authentification en envoyant la demande de connexion
-session.post(url + '/login', data={'username': username, 'password': password})
+session.post(url + '/login', data={'username': username, 'password': password}, verify=False)
 
 # Accédez à la page de téléchargement
-response = session.get(url + '/visuel')
+response = session.get(url + '/visuel', verify=False)
 
 # Vérifier si la page a été chargée avec succès
 if response.status_code == 200:
@@ -33,7 +25,7 @@ if response.status_code == 200:
     download_request = {'csrf_token': csrf_token}
 
     # Envoyer la demande de téléchargement JSON en simulant le clic sur le bouton "Download Report"
-    download_response = session.post(url + '/download', data=download_request)
+    download_response = session.post(url + '/download', data=download_request, verify=False)
 
     # Vérifier si le téléchargement a réussi
     if download_response.status_code == 200:
