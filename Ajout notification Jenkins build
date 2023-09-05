@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+
+    stages {
+        // Ajoutez vos étapes ici
+
+        // Exemple d'étape de notification par e-mail à la fin du travail
+        stage('Notification par e-mail') {
+            steps {
+                script {
+                    emailext subject: 'Statut du travail Jenkins',
+                        body: "Le travail Jenkins a été ${currentBuild.currentResult}.",
+                        to: 'ilyes@test.fr'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up ou d'autres tâches à effectuer après le travail
+        }
+    }
+}
