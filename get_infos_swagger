@@ -1,0 +1,24 @@
+import requests
+
+# URL de l'API et l'URL spécifique pour l'utilisateur 'ilyes'
+url = 'https://toto/api/v1/portal/users/ilyes'
+
+# Votre jeton d'accès
+access_token = 'access_token_78'
+
+# Faites une requête GET pour récupérer les données actuelles
+headers = {
+    'Authorization': f'Bearer {access_token}'
+}
+response = requests.get(url, headers=headers)
+
+# Assurez-vous que la requête GET a réussi
+if response.status_code == 200:
+    # Analysez le contenu JSON de la réponse
+    user_data = response.json()
+    
+    # Affichez les données récupérées
+    print('Données actuelles :')
+    print(user_data)
+else:
+    print('Échec de la récupération des données.')
