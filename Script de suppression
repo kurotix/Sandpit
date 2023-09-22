@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
 set "dossier_parent=E:\"
@@ -11,14 +11,9 @@ for /d %%i in ("%dossier_parent%\p-*") do (
   rem Vérifiez si le dossier "workspace" existe
   if exist "!dossier_a_supprimer!" (
     echo Suppression du contenu de !dossier_a_supprimer!
-
-    rem Supprimez le contenu du dossier "workspace" en conservant le dossier lui-même
-    for /d %%j in ("!dossier_a_supprimer%\*") do (
-      rd /s /q "%%j"
-    )
-
-    rem Créez à nouveau le dossier "workspace" vide s'il n'existe pas
-    mkdir "!dossier_a_supprimer!"
+    
+    rem Utilisez la commande forfiles pour supprimer les fichiers et dossiers
+    forfiles /p "!dossier_a_supprimer!" /s /c "cmd /c if @isdir==TRUE (rmdir /s /q @path) else (del @path)"
   ) else (
     echo Le dossier !dossier_a_supprimer! n'existe pas.
   )
