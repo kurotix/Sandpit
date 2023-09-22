@@ -10,13 +10,10 @@ for /d %%i in ("%dossier_parent%\p-*") do (
 
   rem Vérifiez si le dossier "workspace" existe
   if exist "!dossier_workspace!\" (
-    echo Suppression du contenu de !dossier_workspace!
+    echo Suppression de !dossier_workspace!
     
-    rem Supprimez le contenu du dossier "workspace"
-    del /q "!dossier_workspace!\*.*"
-    for /d %%j in ("!dossier_workspace%\*") do (
-      rmdir /s /q "%%j"
-    )
+    rem Supprimez le dossier "workspace" et son contenu
+    rmdir /s /q "!dossier_workspace!"
   ) else (
     echo Le dossier !dossier_workspace!\ n'existe pas.
   )
