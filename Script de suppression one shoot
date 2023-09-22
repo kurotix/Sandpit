@@ -1,21 +1,17 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
 set "dossier_parent=E:\"
 
 rem Parcourez tous les dossiers commençant par p-
 for /d %%i in ("%dossier_parent%\p-*") do (
-  set "dossier_workspace=%%i\workspace"
-
-  rem Vérifiez si le dossier "workspace" existe
-  if exist "!dossier_workspace!\" (
-    echo Suppression de !dossier_workspace!
-    
-    rem Supprimez le dossier "workspace" et son contenu
-    rmdir /s /q "!dossier_workspace!"
+  set "dossier_a_supprimer=%%i\workspace"
+  if exist "!dossier_a_supprimer!" (
+    echo Suppression du contenu de !dossier_a_supprimer!
+    rd /s /q "!dossier_a_supprimer!"
   ) else (
-    echo Le dossier !dossier_workspace!\ n'existe pas.
+    echo Le dossier !dossier_a_supprimer! n'existe pas.
   )
 )
 
