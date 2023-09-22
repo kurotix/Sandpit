@@ -1,20 +1,25 @@
-# Spécifiez le chemin du dossier parent contenant les dossiers "p-*"
-$dossier_parent = "C:\"
+@echo off
+setlocal
 
-# Obtenez la liste des dossiers parent "p-*"
-$dossiers_parent = Get-ChildItem -Path $dossier_parent -Directory | Where-Object { $_.Name -like "p-*" }
+rem Spécifiez le chemin du dossier parent contenant les dossiers "p-*"
+set "dossier_parent=C:\"
 
-# Parcourez chaque dossier parent "p-*"
-foreach ($dossier in $dossiers_parent) {
-  $dossier_workspace = Join-Path -Path $dossier.FullName -ChildPath "workspace"
+rem Parcourez tous les dossiers commençant par p- sous le dossier parent
+for /d %%i in ("%dossier_parent%\p-*") do (
+  set "dossier_workspace=%%i\workspace"
 
-  # Vérifiez si le dossier "workspace" existe
-  if (Test-Path -Path $dossier_workspace -PathType Container) {
-    Write-Host "Suppression du contenu de $dossier_workspace"
+  rem Vérifiez si le dossier "workspace" existe
+  if exist "!dossier_workspace!\" (
+    echo Suppression du contenu de !dossier_workspace!
+    
+    rem Supprimez le contenu du dossier "workspace"
+    del /q "!dossier_workspace!\*.*"
+    for /d %%j in ("!dossier_workspace%\*") do (
+      rmdir /s /q "%%j"
+    )
+  ) else (
+    echo Le dossier !dossier_workspace!\ n'existe pas.
+  )
+)
 
-    # Supprimez le contenu du dossier "workspace"
-    Remove-Item -Path "$dossier_workspace\*" -Force -Recurse
-  } else {
-    Write-Host "Le dossier $dossier_workspace n'existe pas."
-  }
-}
+endlocal
