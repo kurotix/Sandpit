@@ -1,20 +1,13 @@
-@echo off
-setlocal
+# Spécifiez le chemin du dossier "workspace" à nettoyer
+$dossier_workspace = "C:\p-ilyes\workspace"
 
-rem Spécifiez le chemin du dossier "workspace" à nettoyer
-set "dossier_workspace=C:\p-ilyes\workspace"
+# Vérifiez si le dossier "workspace" existe
+if (Test-Path -Path $dossier_workspace -PathType Container) {
+  Write-Host "Suppression du contenu de $dossier_workspace"
 
-rem Vérifiez si le dossier "workspace" existe
-if exist "%dossier_workspace%\" (
-  echo Suppression du contenu de %dossier_workspace%!
-  
-  rem Supprimez le contenu du dossier "workspace"
-  del /q "%dossier_workspace%\*.*"
-  for /d %%j in ("%dossier_workspace%\*") do (
-    rmdir /s /q "%%j"
-  )
-) else (
-  echo Le dossier %dossier_workspace%\ n'existe pas.
-)
-
-endlocal
+  # Supprimez le contenu du dossier "workspace"
+  Get-ChildItem -Path $dossier_workspace -File | Remove-Item -Force
+  Get-ChildItem -Path $dossier_workspace -Directory | Remove-Item -Force -Recurse
+} else {
+  Write-Host "Le dossier $dossier_workspace n'existe pas."
+}
