@@ -1,21 +1,26 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
 set "dossier_parent=E:\"
 
 rem Parcourez tous les dossiers commençant par p-
 for /d %%i in ("%dossier_parent%\p-*") do (
-  set "dossier_a_supprimer=%%i\workspace"
+  set "dossier_workspace=%%i\workspace"
 
   rem Vérifiez si le dossier "workspace" existe
-  if exist "!dossier_a_supprimer!" (
-    echo Suppression du contenu de !dossier_a_supprimer!
+  if exist "!dossier_workspace!" (
+    echo Suppression du contenu de !dossier_workspace!
     
-    rem Utilisez la commande robocopy pour supprimer les fichiers et dossiers
-    robocopy /MIR "!dossier_a_supprimer!" "!dossier_a_supprimer!" /PURGE
+    rem Supprimez le contenu du dossier "workspace" en conservant le dossier lui-même
+    for /d %%j in ("!dossier_workspace%\*") do (
+      rd /s /q "%%j"
+    )
+
+    rem Créez à nouveau le dossier "workspace" vide s'il n'existe pas
+    mkdir "!dossier_workspace!"
   ) else (
-    echo Le dossier !dossier_a_supprimer! n'existe pas.
+    echo Le dossier !dossier_workspace! n'existe pas.
   )
 )
 
