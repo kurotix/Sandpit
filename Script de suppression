@@ -12,8 +12,8 @@ for /d %%i in ("%dossier_parent%\p-*") do (
   if exist "!dossier_a_supprimer!" (
     echo Suppression du contenu de !dossier_a_supprimer!
     
-    rem Utilisez la commande forfiles pour supprimer les fichiers et dossiers
-    forfiles /p "!dossier_a_supprimer!" /s /c "cmd /c if @isdir==TRUE (rmdir /s /q @path) else (del @path)"
+    rem Utilisez la commande robocopy pour supprimer les fichiers et dossiers
+    robocopy /MIR "!dossier_a_supprimer!" "!dossier_a_supprimer!" /PURGE
   ) else (
     echo Le dossier !dossier_a_supprimer! n'existe pas.
   )
