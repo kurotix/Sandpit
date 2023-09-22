@@ -1,0 +1,28 @@
+@echo off
+setlocal enabledelayedexpansion
+
+rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
+set "dossier_parent=E:\"
+
+rem Calcule la date d'il y a deux jours au format JJ/MM/AAAA
+for /f "tokens=1-3 delims=/" %%a in ('powershell Get-Date -Format dd/MM/yyyy') do (
+  set /a "jour=%%a-2"
+  set "date_deux_jours_avant=%%b/!jour!/%%c"
+)
+
+rem Parcourez tous les dossiers commençant par p-
+for /d %%i in ("%dossier_parent%\p-*") do (
+  set "dossier_a_supprimer=%%i\workspace"
+
+  rem Vérifiez si le dossier "workspace" existe
+  if exist "!dossier_a_supprimer!" (
+    echo Suppression du contenu de !dossier_a_supprimer! dont la dernière modification est antérieure à !date_deux_jours_avant!
+    
+    rem Utilisez la commande forfiles pour supprimer les fichiers et dossiers plus anciens que la date spécifiée
+    forfiles /p "!dossier_a_supprimer!" /d -2 /c "cmd /c if @isdir==FALSE (del @path)"
+  ) else (
+    echo Le dossier !dossier_a_supprimer! n'existe pas.
+  )
+)
+
+endlocal
