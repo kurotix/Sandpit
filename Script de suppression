@@ -12,13 +12,8 @@ for /d %%i in ("%dossier_parent%\p-*") do (
   if exist "!dossier_workspace!" (
     echo Suppression du contenu de !dossier_workspace!
     
-    rem Supprimez le contenu du dossier "workspace" en conservant le dossier lui-même
-    for /d %%j in ("!dossier_workspace%\*") do (
-      rd /s /q "%%j"
-    )
-
-    rem Créez à nouveau le dossier "workspace" vide s'il n'existe pas
-    mkdir "!dossier_workspace!"
+    rem Utilisez la commande xcopy pour copier un dossier vide dans le dossier "workspace"
+    xcopy /s /e /q /y nul "!dossier_workspace!\"
   ) else (
     echo Le dossier !dossier_workspace! n'existe pas.
   )
