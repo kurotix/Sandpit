@@ -1,13 +1,19 @@
-# Spécifiez le chemin du dossier "workspace" à nettoyer
-$dossier_workspace = "C:\p-ilyes\workspace"
+@echo off
+setlocal enabledelayedexpansion
 
-# Vérifiez si le dossier "workspace" existe
-if (Test-Path -Path $dossier_workspace -PathType Container) {
-  Write-Host "Suppression du contenu de $dossier_workspace"
+rem Spécifiez le chemin du dossier parent contenant les dossiers "p-*"
+set "dossier_parent=C:\"
 
-  # Supprimez le contenu du dossier "workspace"
-  Get-ChildItem -Path $dossier_workspace -File | Remove-Item -Force
-  Get-ChildItem -Path $dossier_workspace -Directory | Remove-Item -Force -Recurse
-} else {
-  Write-Host "Le dossier $dossier_workspace n'existe pas."
-}
+rem Parcourez tous les dossiers commençant par p- sous le dossier parent
+for /d %%i in ("%dossier_parent%\p-*") do (
+  set "dossier_workspace=%%i\workspace"
+
+  rem Vérifiez si le dossier "workspace" existe
+  if exist "!dossier_workspace!\" (
+    echo Suppression du contenu de !dossier_workspace!
+    
+    rem Supprimez le contenu du dossier "workspace"
+    del /q "!dossier
+
+
+
