@@ -1,0 +1,27 @@
+@echo off
+setlocal
+
+rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
+set "dossier_parent=E:\"
+
+rem Parcourez tous les dossiers commençant par p-
+for /d %%i in ("%dossier_parent%\p-*") do (
+  set "dossier_workspace=%%i\workspace"
+
+  rem Vérifiez si le dossier "workspace" existe
+  if exist "!dossier_workspace!\" (
+    echo Suppression du contenu de !dossier_workspace!
+    
+    rem Supprimez le contenu du dossier "workspace"
+    for /d %%j in ("!dossier_workspace%\*") do (
+      rd /s /q "%%j"
+    )
+
+    rem Créez à nouveau le dossier "workspace" vide
+    mkdir "!dossier_workspace!\"
+  ) else (
+    echo Le dossier !dossier_workspace!\ n'existe pas.
+  )
+)
+
+endlocal
