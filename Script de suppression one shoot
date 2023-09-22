@@ -1,18 +1,20 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
-rem Spécifiez le chemin du dossier parent contenant les dossiers p-*
-set "dossier_parent=E:\"
+rem Spécifiez le chemin du dossier "workspace" à nettoyer
+set "dossier_workspace=C:\p-ilyes\workspace"
 
-rem Parcourez tous les dossiers commençant par p-
-for /d %%i in ("%dossier_parent%\p-*") do (
-  set "dossier_a_supprimer=%%i\workspace"
-  if exist "!dossier_a_supprimer!" (
-    echo Suppression du contenu de !dossier_a_supprimer!
-    rd /s /q "!dossier_a_supprimer!"
-  ) else (
-    echo Le dossier !dossier_a_supprimer! n'existe pas.
+rem Vérifiez si le dossier "workspace" existe
+if exist "%dossier_workspace%\" (
+  echo Suppression du contenu de %dossier_workspace%!
+  
+  rem Supprimez le contenu du dossier "workspace"
+  del /q "%dossier_workspace%\*.*"
+  for /d %%j in ("%dossier_workspace%\*") do (
+    rmdir /s /q "%%j"
   )
+) else (
+  echo Le dossier %dossier_workspace%\ n'existe pas.
 )
 
 endlocal
