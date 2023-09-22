@@ -1,0 +1,14 @@
+stages:
+  - build
+
+variables:
+  NPMRC_FILE_PATH: "$CI_PROJECT_DIR/.npmrc"
+
+before_script:
+  - export NPM_AUTH_TOKEN=$(grep -Po '(?<=//registry.npmjs.org/:_authToken=)[^\s]+' $NPMRC_FILE_PATH)
+
+build:
+  script:
+    - echo "Auth Token: $NPM_AUTH_TOKEN"
+    - npm install
+    - npm publish
