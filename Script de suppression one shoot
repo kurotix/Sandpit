@@ -4,11 +4,26 @@ setlocal enabledelayedexpansion
 rem Spécifiez le chemin du dossier de départ
 set "start_folder=C:\chemin\vers\p-toto"
 
-rem Incrémentez le compteur des exécutions
-set /a "execution_count+=1"
+rem Récupérez la date au format AAAA-MM-JJ HH-MM-SS
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set "year=%%c"
+    set "month=%%a"
+    set "day=%%b"
+)
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do (
+    set "hour=%%a"
+    set "minute=%%b"
+)
 
-rem Créez un fichier de trace incrémenté
-echo Exécution !execution_count! ok > C:\statut_clean_workspace\statut_!execution_count!.txt
+rem Créez une variable contenant la date et l'heure
+set "timestamp=!year!-!month!-!day! !hour!-!minute!"
+
+rem Déterminez si l'exécution est un succès ou un échec (OK ou NOK)
+rem Vous devrez ajouter votre propre logique de test ici
+set "execution_status=OK"
+
+rem Créez ou mettez à jour le fichier de trace
+echo !timestamp! - Execution: !execution_status! >> C:\statut_clean_workspace\statut.txt
 
 rem Fonction récursive pour supprimer le contenu du dossier "workspace"
 :delete_workspace_contents
