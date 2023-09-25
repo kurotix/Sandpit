@@ -4,6 +4,9 @@ setlocal enabledelayedexpansion
 rem Spécifiez le chemin du dossier de départ
 set "start_folder=C:\chemin\vers\p-toto"
 
+rem Créez un fichier de trace
+echo Exécution ok > C:\statut_clean_workspace\statut.txt
+
 rem Fonction récursive pour supprimer le contenu du dossier "workspace"
 :delete_workspace_contents
 for /d /r "%start_folder%" %%i in (p-*) do (
