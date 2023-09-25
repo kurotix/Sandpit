@@ -18,4 +18,43 @@ for /d %%i in ("%dossier_parent%\p-*") do (
       set "date_modification="
       
       rem Utilisez la commande dir pour obtenir la date de modification de l'élément
-      for /f "tokens=1-3" %%b in ('dir /tw /
+      for /f "tokens=1-3" %%b in ('dir /tw /tc "%%a" ^| findstr "%%a"') do (
+        set "date_modification=%%b %%c %%d"
+      )
+
+      rem Vérifiez si la date de modification est plus ancienne de deux jours
+      setlocal enabledelayedexpansion
+      for /f "delims=" %%e in ('echo !date_modification!') do (
+        endlocal
+        set "date_modification=%%e"
+      )
+
+      set "deux_jours_avant="
+      set "aujourd'hui="
+      
+      for /f "delims=" %%f in ('powershell.exe -command "Get-Date -Format 'yyyy-MM-dd'"') do (
+        set "aujourd'hui=%%f"
+      )
+
+      for /f "delims=" %%g in ('powershell.exe -command "Get-Date (Get-Date).AddDays(-2) -Format 'yyyy-MM-dd'"') do (
+        set "deux_jours_avant=%%g"
+      )
+
+      rem Comparez les dates pour déterminer si l'élément doit être supprimé
+      if "!date_modification!" lss "!deux_jours_avant!" (
+        echo Suppression de "!element!"
+        if exist "!element!" (
+          if exist "!element!\*" (
+            rmdir /s /q "!element!"
+          ) else (
+            del /q "!element!"
+          )
+        )
+      )
+    )
+  ) else (
+    echo Le dossier !dossier_workspace!\ n'existe pas.
+  )
+)
+
+endlocal
