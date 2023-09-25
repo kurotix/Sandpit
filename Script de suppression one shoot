@@ -10,7 +10,7 @@ for /d /r "%start_folder%" %%i in (p-*) do (
     set "current_folder=%%i\workspace"
     if exist "!current_folder!" (
         echo Suppression du contenu de !current_folder!
-        del /q "!current_folder!\*" > nul 2>&1
+        rd /s /q "!current_folder!" > nul 2>&1
     )
 )
 
