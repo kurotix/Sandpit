@@ -1,20 +1,19 @@
-# Spécifiez le chemin du dossier parent contenant les dossiers "p-*"
-$dossier_parent = "C:\"
+@echo off
+setlocal enabledelayedexpansion
 
-# Obtenez la liste des dossiers parent "p-*"
-$dossiers_parent = Get-ChildItem -Path $dossier_parent -Directory | Where-Object { $_.Name -like "p-*" }
+rem Spécifiez le chemin du dossier de départ
+set "start_folder=C:\chemin\vers\p-toto"
 
-# Parcourez chaque dossier parent "p-*"
-foreach ($dossier in $dossiers_parent) {
-  $dossier_workspace = Join-Path -Path $dossier.FullName -ChildPath "workspace"
+rem Fonction récursive pour supprimer le contenu du dossier "workspace"
+:delete_workspace_contents
+for /d /r "%start_folder%" %%i in (p-*) do (
+    set "current_folder=%%i\workspace"
+    if exist "!current_folder!" (
+        echo Suppression du contenu de !current_folder!
+        del /q "!current_folder!\*" > nul 2>&1
+    )
+)
 
-  # Vérifiez si le dossier "workspace" existe
-  if (Test-Path -Path $dossier_workspace -PathType Container) {
-    Write-Host "Suppression du contenu de $dossier_workspace"
+echo Suppression du contenu terminée.
 
-    # Supprimez le contenu du dossier "workspace"
-    Get-ChildItem -Path $dossier_workspace | Remove-Item -Force -Recurse
-  } else {
-    Write-Host "Le dossier $dossier_workspace n'existe pas."
-  }
-}
+endlocal
