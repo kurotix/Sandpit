@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 rem Spécifiez le chemin du dossier de départ
-set "start_folder=C:\chemin\vers\p-toto"
+set "start_folder=C:\chemin\vers"
 
 rem Récupérez la date au format AAAA-MM-JJ HH-MM-SS
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
@@ -25,8 +25,14 @@ set "execution_status=OK"
 rem Créez ou mettez à jour le fichier de trace
 echo !timestamp! - Execution: !execution_status! >> C:\statut_clean_workspace\statut.txt
 
-rem Supprimez les fichiers et dossiers modifiés il y a plus de 2 jours
-forfiles /p "%start_folder%\workspace" /s /d -2 /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path)" > nul 2>&1
+rem Parcourez les dossiers parents commençant par "p-"
+for /d %%i in ("%start_folder%\p-*") do (
+    set "workspace_folder=%%i\workspace"
+    if exist "!workspace_folder!" (
+        rem Supprimez les fichiers et dossiers modifiés il y a plus de 2 jours dans le dossier "workspace"
+        forfiles /p "!workspace_folder!" /s /d -2 /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path)" > nul 2>&1
+    )
+)
 
 rem Vérifiez si l'exécution est un échec et ajustez le statut en conséquence
 if "!execution_status!"=="NOK" (
