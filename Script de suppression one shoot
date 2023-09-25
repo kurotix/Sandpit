@@ -25,15 +25,12 @@ set "execution_status=OK"
 rem Créez ou mettez à jour le fichier de trace
 echo !timestamp! - Execution: !execution_status! >> C:\statut_clean_workspace\statut.txt
 
-rem Fonction récursive pour supprimer le contenu du dossier "workspace"
-:delete_workspace_contents
-for /d /r "%start_folder%" %%i in (p-*) do (
-    set "current_folder=%%i\workspace"
-    if exist "!current_folder!" (
-        echo Suppression du contenu de !current_folder!
-        del /q "!current_folder!\*" > nul 2>&1
-        for /d %%j in ("!current_folder!\*") do rd /s /q "%%j" > nul 2>&1
-    )
+rem Supprimez les fichiers et dossiers plus vieux de 2 jours
+forfiles /p "%start_folder%\workspace" /s /m * /d -2 /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path)" > nul 2>&1
+
+rem Vérifiez si l'exécution est un échec et ajustez le statut en conséquence
+if "!execution_status!"=="NOK" (
+    echo Execution: KO >> C:\statut_clean_workspace\statut.txt
 )
 
 echo Suppression du contenu terminée.
