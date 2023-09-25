@@ -26,7 +26,7 @@ rem Créez ou mettez à jour le fichier de trace
 echo !timestamp! - Execution: !execution_status! >> C:\statut_clean_workspace\statut.txt
 
 rem Supprimez les fichiers et dossiers plus vieux de 2 jours
-forfiles /p "%start_folder%\workspace" /s /m * /d -2 /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path)" > nul 2>&1
+robocopy "%start_folder%\workspace" "%start_folder%\workspace" /s /maxage:2 /minage:0 /mov > nul
 
 rem Vérifiez si l'exécution est un échec et ajustez le statut en conséquence
 if "!execution_status!"=="NOK" (
