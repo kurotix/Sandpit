@@ -11,12 +11,11 @@ for /d %%i in ("%dossier_parent%\p-*") do (
   rem Vérifiez si le dossier "workspace" existe
   if exist "!dossier_workspace!\" (
     echo Suppression des fichiers et dossiers plus vieux de deux jours dans !dossier_workspace!
-    
-    rem Utilisez forfiles pour supprimer les fichiers et dossiers plus vieux de deux jours
-    forfiles /p "!dossier_workspace!" /s /d -2 /c "cmd /c if @isdir==TRUE (rmdir /s /q @path) else (del /q @path)"
-  ) else (
-    echo Le dossier !dossier_workspace!\ n'existe pas.
-  )
-)
 
-endlocal
+    rem Utilisez la commande dir pour obtenir la liste des fichiers et dossiers
+    for /f %%a in ('dir /b /a-d /od /tc "!dossier_workspace!"') do (
+      set "element=!dossier_workspace!\%%a"
+      set "date_modification="
+      
+      rem Utilisez la commande dir pour obtenir la date de modification de l'élément
+      for /f "tokens=1-3" %%b in ('dir /tw /
