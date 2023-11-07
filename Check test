@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                // Étape pour récupérer le code source
+                checkout scm
+            }
+        }
+        stage('Récupérer le statut de la merge request') {
+            steps {
+                script {
+                    // Exécutez des commandes Git pour récupérer le statut
+                    def branch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStatus: true).trim()
+                    def mergeRequestStatus = sh(script: 'git status', returnStatus: true).trim()
+                    
+                    // Affichez le statut dans la console Jenkins
+                    echo "Statut de la merge request : $mergeRequestStatus"
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                // Ajoutez ici les étapes de construction de votre application
+            }
+        }
+    }
+}
