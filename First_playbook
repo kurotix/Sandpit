@@ -1,0 +1,9 @@
+---
+- name: Créer un fichier toto.txt sur sv0212
+  hosts: sv0212
+  gather_facts: false
+  tasks:
+    - name: Créer le fichier toto.txt
+      ansible.windows.win_file:
+        path: C:\chemin\vers\toto.txt
+        state: touch
