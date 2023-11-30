@@ -1,0 +1,28 @@
+---
+- name: Déploiement du fichier .bat et planification de la tâche
+  hosts: 
+    - toto
+    - titi
+  tasks:
+    - name: Clone le dépôt Git
+      git:
+        repo: https://gitlab/super/Nassim/super.git  # Mettez l'URL complète du dépôt GitLab
+        dest: /chemin/vers/destination  # Répertoire de destination sur la machine de contrôle
+
+    - name: Copie le fichier .bat vers la machine cible
+      copy:
+        src: /chemin/vers/destination/Nassim/kiki.bat  # Ajustez le chemin en fonction de votre structure de dépôt
+        dest: D:/Never-delete/kiki.bat
+
+    - name: Planifie la tâche quotidienne
+      win_scheduled_task:
+        name: Nom_de_la_tache
+        description: Description_de_la_tache
+        action:
+          - type: execute
+            path: D:/Never-delete/kiki.bat
+        trigger:
+          daily:
+            enabled: yes
+            hour: 4
+            minute: 0
