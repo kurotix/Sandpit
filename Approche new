@@ -1,0 +1,8 @@
+---
+- hosts: titi
+  tasks:
+    - name: Planifier une tâche quotidienne à 4h du matin
+      win_shell: |
+        $Action = New-ScheduledTaskAction -Execute "chemin\vers\votre\toto.bat"
+        $Trigger = New-ScheduledTaskTrigger -Daily -At 4am
+        Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "NomDeLaTache" -Description "Description de la tâche"
