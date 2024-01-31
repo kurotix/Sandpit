@@ -8,8 +8,16 @@ if not exist "!logDir!" mkdir "!logDir!"
 
 cd /d E:\
 for /r %%i in (jenkins-*) do (
-    del "%%i\*.log" /q >> "!logFile!" 2>&1
-    del "%%i\*.mdmp" /q >> "!logFile!" 2>&1
+    for %%f in (%%i\*.log) do (
+        set "filename=%%~nxf"
+        if /i not "!filename!"=="jenkins-slave.err.log" (
+            if /i not "!filename!"=="jenkins-slave.out.log" (
+                if /i not "!filename!"=="Jenkins-slave.wrapper.log" (
+                    del "%%f" /q >> "!logFile!" 2>&1
+                )
+            )
+        )
+    )
 )
 
 echo Suppression des fichiers .log et .mdmp terminée. Les détails sont enregistrés dans "!logFile!".
