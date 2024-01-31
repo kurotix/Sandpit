@@ -13,11 +13,19 @@ for /d %%i in (jenkins-*) do (
     
     for /r %%j in (*.log) do (
         set "filename=%%~nxj"
-        set "filetime=%%~tj"
-        set "currentTime=!time: =0!"
-        set "filetime=!filetime: =0!"
 
-        set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
+        rem Obtenir la date de modification du fichier
+        for /f "delims=" %%a in ('wmic datafile where "name='%%j'" get lastmodified ^| find "."') do set filedate=%%a
+        
+        rem Extraire l'année, le mois, le jour, l'heure et la minute
+        set "year=!filedate:~0,4!"
+        set "month=!filedate:~4,2!"
+        set "day=!filedate:~6,2!"
+        set "hour=!filedate:~8,2!"
+        set "minute=!filedate:~10,2!"
+
+        rem Calculer la différence de temps en minutes
+        set /a "elapsedMinutes=((((1!currentTime:~0,2!-1!hour!)*60)+1!currentTime:~3,2!-1!minute!))"
 
         if !elapsedMinutes! gtr 10 (
             del "%%j" /q >> "!logFile!" 2^>^&1
