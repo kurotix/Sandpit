@@ -1,12 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
+set "start_folder=E:"
 set "logDir=E:\protected\scriptsCleans"
 set "logFile=!logDir!\cleanup_log_%date:~10,4%-%date:~4,2%-%date:~7,2%.txt"
 
 if not exist "!logDir!" mkdir "!logDir!"
 
-cd /d E:\
+pushd %start_folder%
 for /d %%i in (jenkins-*) do (
     pushd "%%i"
     for /f "delims=" %%f in ('forfiles /m *.log /c "cmd /c echo @file @ftime"') do (
@@ -29,5 +30,6 @@ for /d %%i in (jenkins-*) do (
     )
     popd
 )
+popd
 
 echo Suppression des fichiers .log et .mdmp terminée. Les détails sont enregistrés dans "!logFile!".
