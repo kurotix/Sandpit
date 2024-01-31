@@ -8,7 +8,8 @@ if not exist "!logDir!" mkdir "!logDir!"
 
 cd /d E:\
 for /d %%i in (jenkins-*) do (
-    for /f "delims=" %%f in ('forfiles /p "%%i" /m *.log /c "cmd /c echo @file @ftime"') do (
+    pushd "%%i"
+    for /f "delims=" %%f in ('forfiles /m *.log /c "cmd /c echo @file @ftime"') do (
         set "filename=%%~nf"
         set "filetime=%%~xf"
         set "currentTime=!time: =0!"
@@ -20,12 +21,13 @@ for /d %%i in (jenkins-*) do (
             if /i not "!filename!"=="jenkins-slave.out.log" (
                 if /i not "!filename!"=="Jenkins-slave.wrapper.log" (
                     if !elapsedMinutes! gtr 10 (
-                        del "%%i\!filename!.log" /q >> "!logFile!" 2>&1
+                        del "!filename!.log" /q >> "!logFile!" 2>&1
                     )
                 )
             )
         )
     )
+    popd
 )
 
 echo Suppression des fichiers .log et .mdmp terminée. Les détails sont enregistrés dans "!logFile!".
