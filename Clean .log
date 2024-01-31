@@ -11,15 +11,15 @@ pushd %start_folder%
 for /d %%i in (jenkins-*) do (
     pushd "%%i"
     
-    for /r %%j in (*) do (
+    for /r %%j in (*.log *.mdmp) do (
+        set "filename=%%~ni"
+        set "filetime=%%~tj"
+        set "currentTime=!time: =0!"
+        set "filetime=!filetime: =0!"
+
+        set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
+
         if /i "%%~xj"==".log" (
-            set "filename=%%~ni"
-            set "filetime=%%~tj"
-            set "currentTime=!time: =0!"
-            set "filetime=!filetime: =0!"
-
-            set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
-
             if /i not "!filename!"=="jenkins-slave.err" (
                 if /i not "!filename!"=="jenkins-slave.out" (
                     if /i not "!filename!"=="Jenkins-slave.wrapper" (
@@ -30,15 +30,8 @@ for /d %%i in (jenkins-*) do (
                 )
             )
         )
-        
+
         if /i "%%~xj"==".mdmp" (
-            set "filename=%%~ni"
-            set "filetime=%%~tj"
-            set "currentTime=!time: =0!"
-            set "filetime=!filetime: =0!"
-
-            set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
-
             if !elapsedMinutes! gtr 10 (
                 del "%%j" /q >> "!logFile!" 2^>^&1
             )
