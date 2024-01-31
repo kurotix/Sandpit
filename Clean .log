@@ -14,9 +14,9 @@ for /d %%i in (jenkins-*) do (
     for /r %%j in (*.log) do (
         set "filename=%%~nxj"
 
-        rem Obtenir la date de modification du fichier
-        for /f "delims=" %%a in ('wmic datafile where "name='%%j'" get lastmodified ^| find "."') do set filedate=%%a
-        
+        rem Obtenir la date de modification du fichier en utilisant PowerShell
+        for /f "delims=" %%a in ('powershell "(Get-Item '%%j').LastWriteTime.ToString('yyyyMMddHHmmss')"') do set filedate=%%a
+
         rem Extraire l'année, le mois, le jour, l'heure et la minute
         set "year=!filedate:~0,4!"
         set "month=!filedate:~4,2!"
