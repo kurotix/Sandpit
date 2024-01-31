@@ -10,35 +10,38 @@ if not exist "!logDir!" mkdir "!logDir!"
 pushd %start_folder%
 for /d %%i in (jenkins-*) do (
     pushd "%%i"
-    for /f "delims=" %%f in ('forfiles /m *.log /c "cmd /c echo @file @ftime"') do (
-        set "filename=%%~nf"
-        set "filetime=%%~tf"
-        set "currentTime=!time: =0!"
-        set "filetime=!filetime: =0!"
+    
+    for /r %%j in (*) do (
+        if /i "%%~xj"==".log" (
+            set "filename=%%~ni"
+            set "filetime=%%~tj"
+            set "currentTime=!time: =0!"
+            set "filetime=!filetime: =0!"
 
-        set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
+            set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
 
-        if /i not "!filename!"=="jenkins-slave.err.log" (
-            if /i not "!filename!"=="jenkins-slave.out.log" (
-                if /i not "!filename!"=="Jenkins-slave.wrapper.log" (
-                    if !elapsedMinutes! gtr 10 (
-                        del "!filename!.log" /q >> "!logFile!" 2^>^&1
+            if /i not "!filename!"=="jenkins-slave.err" (
+                if /i not "!filename!"=="jenkins-slave.out" (
+                    if /i not "!filename!"=="Jenkins-slave.wrapper" (
+                        if !elapsedMinutes! gtr 10 (
+                            del "%%j" /q >> "!logFile!" 2^>^&1
+                        )
                     )
                 )
             )
         )
-    )
+        
+        if /i "%%~xj"==".mdmp" (
+            set "filename=%%~ni"
+            set "filetime=%%~tj"
+            set "currentTime=!time: =0!"
+            set "filetime=!filetime: =0!"
 
-    for /f "delims=" %%f in ('forfiles /m *.mdmp /c "cmd /c echo @file @ftime"') do (
-        set "filename=%%~nf"
-        set "filetime=%%~tf"
-        set "currentTime=!time: =0!"
-        set "filetime=!filetime: =0!"
+            set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
 
-        set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
-
-        if /i !elapsedMinutes! gtr 10 (
-            del "!filename!.mdmp" /q >> "!logFile!" 2^>^&1
+            if !elapsedMinutes! gtr 10 (
+                del "%%j" /q >> "!logFile!" 2^>^&1
+            )
         )
     )
 
