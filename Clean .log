@@ -7,13 +7,21 @@ set "logFile=!logDir!\cleanup_log_%date:~10,4%-%date:~4,2%-%date:~7,2%.txt"
 if not exist "!logDir!" mkdir "!logDir!"
 
 cd /d E:\
-for /r %%i in (jenkins-*) do (
-    for %%f in (%%i\*.log) do (
-        set "filename=%%~nxf"
+for /d %%i in (jenkins-*) do (
+    for /f "delims=" %%f in ('forfiles /p "%%i" /m *.log /c "cmd /c echo @file @ftime"') do (
+        set "filename=%%~nf"
+        set "filetime=%%~xf"
+        set "currentTime=!time: =0!"
+        set "filetime=!filetime: =0!"
+
+        set /a "elapsedMinutes=(((1!currentTime:~0,2!-1!filetime:~0,2!)*60)+1!currentTime:~3,2!-1!filetime:~3,2!)"
+
         if /i not "!filename!"=="jenkins-slave.err.log" (
             if /i not "!filename!"=="jenkins-slave.out.log" (
                 if /i not "!filename!"=="Jenkins-slave.wrapper.log" (
-                    del "%%f" /q >> "!logFile!" 2>&1
+                    if !elapsedMinutes! gtr 10 (
+                        del "%%i\!filename!.log" /q >> "!logFile!" 2>&1
+                    )
                 )
             )
         )
