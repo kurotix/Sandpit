@@ -2,6 +2,7 @@
 setlocal
 
 set "targetDir=E:\protected\scan fortify\sca21.2\build"
+set "outputDir=E:\protected\Scripts_clean_global\statut_clean_40fy_trace_build"
 set "cutoffTime=2"
 
 rem Convert cutoff time to minutes
@@ -29,6 +30,6 @@ echo Current Date and Time: %currentDate% %currentTime%
 echo Cutoff Time: %cutoffTime%
 
 rem Delete files and folders modified more than 2 hours ago
-forfiles /p "%targetDir%" /s /d -%cutoffTime% /c "cmd /c if @isdir==TRUE rd /s /q @path else del /q @path"
+forfiles /p "%targetDir%" /s /d -%cutoffTime% /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path & echo Deleted: @path >> "%outputDir%\deleted_files.log")"
 
 endlocal
