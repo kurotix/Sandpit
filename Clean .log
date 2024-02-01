@@ -1,30 +1,34 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
-set "start_folder=E:\"
-set "logDir=E:\protected\scriptsCleans"
-set "logFile=!logDir!\cleanup_log_%date:~10,4%-%date:~4,2%-%date:~7,2%.txt"
+set "targetDir=E:\protected\scan fortify\sca21.2\build"
+set "cutoffTime=2"
 
-if not exist "!logDir!" mkdir "!logDir!"
+rem Convert cutoff time to minutes
+set /a "cutoffTimeMinutes=cutoffTime*60"
 
-pushd %start_folder%
-for /d %%i in (jenkins-*) do (
-    pushd "%%i"
-    
-    for /r %%j in (*.log) do (
-        set "filename=%%~nxj"
+rem Get current time
+for /f "delims=" %%a in ('wmic os get localdatetime ^| find "."') do set datetime=%%a
+set "currentDate=%datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2%"
+set "currentTime=%datetime:~8,2%:%datetime:~10,2%"
 
-        if /i not "!filename!"=="jenkins-slave.err.log" (
-            if /i not "!filename!"=="jenkins-slave.out.log" (
-                if /i not "!filename!"=="Jenkins-slave.wrapper.log" (
-                    del "%%j" /q >> "!logFile!" 2^>^&1
-                )
-            )
-        )
-    )
-
-    popd
+rem Calculate cutoff time
+for /f "tokens=1-3 delims=:." %%a in ("%currentTime%") do (
+    set /a "currentMinutes=(((%%a*60)+1%%b %% 100)+100)*60+1%%c %% 100-100"
+    set /a "cutoffMinutes=currentMinutes-cutoffTimeMinutes"
 )
-popd
 
-echo Suppression des fichiers .log terminée. Les détails sont enregistrés dans "!logFile!".
+rem Convert cutoff time back to HH:mm format
+set /a "cutoffHH=cutoffMinutes/60"
+set /a "cutoffMM=cutoffMinutes%%60"
+if %cutoffHH% lss 10 set "cutoffHH=0%cutoffHH%"
+if %cutoffMM% lss 10 set "cutoffMM=0%cutoffMM%"
+set "cutoffTime=%cutoffHH%:%cutoffMM%"
+
+echo Current Date and Time: %currentDate% %currentTime%
+echo Cutoff Time: %cutoffTime%
+
+rem Delete files and folders modified more than 2 hours ago
+forfiles /p "%targetDir%" /s /d -%cutoffTime% /c "cmd /c if @isdir==TRUE rd /s /q @path else del /q @path"
+
+endlocal
