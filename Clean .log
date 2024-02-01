@@ -19,16 +19,4 @@ echo Current Date and Time: !datetime!
 echo Cutoff Time: !cutoffTime!
 
 rem PowerShell script to delete files and folders modified more than 2 hours ago
-set "psScript="
-set "psScript+=Get-ChildItem -Path '%targetDir%' -Recurse ^|"
-set "psScript+= Where-Object {$_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes)} ^|"
-set "psScript+= ForEach-Object {"
-set "psScript+=     if ($_.PSIsContainer) { Remove-Item -Recurse -Force $_.FullName }"
-set "psScript+=     else { Remove-Item -Force $_.FullName; echo 'Deleted: ' + $_.FullName >> '%outputDir%\deleted_files.log' }"
-set "psScript+= }"
-
-rem Execute PowerShell script
-powershell -ExecutionPolicy Bypass -Command "!psScript!"
-
-:end
-exit /b
+powershell -ExecutionPolicy Bypass -Command "& {Get-ChildItem -Path '%targetDir%' -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes))} | ForEach-Object { Remove-Item -Recurse -Force $_.FullName; echo 'Deleted: ' + $_.FullName >> '%outputDir%\deleted_files.log' }}"
