@@ -1,26 +1,29 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 set "targetDir=E:\protected\scan fortify\sca21.2\build"
 set "outputDir=E:\protected\Scripts_clean_global\statut_clean_40fy_trace_build"
 set "cutoffTimeMinutes=120"
 
 rem Get current time
-for /f "delims=" %%a in ('wmic path win32_utctime get /format:value') do set "datetime=%%a"
-set "currentDate=%datetime:~0,4%-%datetime:~4,2%-%datetime:~6,2%"
-set "currentTime=%datetime:~8,2%:%datetime:~10,2%"
+for /f "delims=" %%a in ('powershell Get-Date -Format "yyyy-MM-ddTHH:mm:ss"') do set "datetime=%%a"
 
 rem Convert cutoff time back to HH:mm format
 set /a "cutoffHH=cutoffTimeMinutes/60"
 set /a "cutoffMM=cutoffTimeMinutes%%60"
-if %cutoffHH% lss 10 set "cutoffHH=0%cutoffHH%"
-if %cutoffMM% lss 10 set "cutoffMM=0%cutoffMM%"
-set "cutoffTime=%cutoffHH%:%cutoffMM%"
+if !cutoffHH! lss 10 set "cutoffHH=0!cutoffHH!"
+if !cutoffMM! lss 10 set "cutoffMM=0!cutoffMM!"
+set "cutoffTime=!cutoffHH!:!cutoffMM!"
 
-echo Current Date and Time: %currentDate% %currentTime%
-echo Cutoff Time: %cutoffTime%
+echo Current Date and Time: !datetime!
+echo Cutoff Time: !cutoffTime!
 
 rem Delete files and folders modified more than 2 hours ago
-forfiles /p "%targetDir%" /s /m * /c "cmd /c if @isdir==TRUE (rd /s /q @path) else (del /q @path & echo Deleted: @path >> "%outputDir%\deleted_files.log")"
+for /f "delims=" %%a in ('powershell Get-ChildItem -Path "%targetDir%" -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes%))}') do (
+    if exist "%%a" (
+        if exist "%%a" (rd /s /q "%%a") else (del /q "%%a" & echo Deleted: "%%a" >> "%outputDir%\deleted_files.log")
+    )
+)
 
-endlocal
+:end
+exit /b
