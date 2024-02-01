@@ -1,8 +1,26 @@
-@echo off
-setlocal enabledelayedexpansion
+param (
+    [string]$targetDir,
+    [string]$outputDir,
+    [int]$cutoffTimeMinutes
+)
 
-set "targetDir=E:\protected\scan fortify\sca21.2\build"
-set "outputDir=E:\protected\Scripts_clean_global\statut_clean_40fy_trace_build"
-set "cutoffTimeMinutes=120"
+# Get current time
+$datetime = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
 
-powershell -ExecutionPolicy Bypass -File cleanup.ps1 -targetDir "%targetDir%" -outputDir "%outputDir%" -cutoffTimeMinutes %cutoffTimeMinutes%
+# Convert cutoff time back to HH:mm format
+$cutoffHH = $cutoffTimeMinutes / 60
+$cutoffMM = $cutoffTimeMinutes % 60
+$cutoffTime = "{0:D2}:{1:D2}" -f $cutoffHH, $cutoffMM
+
+Write-Host "Current Date and Time: $datetime"
+Write-Host "Cutoff Time: $cutoffTime"
+
+# Delete files and folders modified more than 2 hours ago
+Get-ChildItem -Path $targetDir -Recurse | Where-Object { $_.LastWriteTime -lt (Get-Date).AddMinutes(-$cutoffTimeMinutes) } | ForEach-Object {
+    if ($_.PSIsContainer) {
+        Remove-Item -Recurse -Force $_.FullName
+    } else {
+        Remove-Item -Force $_.FullName
+        Add-Content -Path "$outputDir\deleted_files.log" -Value "Deleted: $($_.FullName)"
+    }
+}
