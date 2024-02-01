@@ -23,12 +23,12 @@ set "psScript="
 set "psScript+=Get-ChildItem -Path '%targetDir%' -Recurse ^|"
 set "psScript+= Where-Object {$_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes)} ^|"
 set "psScript+= ForEach-Object {"
-set "psScript+=     if (Test-Path $_.FullName -PathType Container) { Remove-Item -Recurse -Force $_.FullName }"
+set "psScript+=     if ($_.PSIsContainer) { Remove-Item -Recurse -Force $_.FullName }"
 set "psScript+=     else { Remove-Item -Force $_.FullName; echo 'Deleted: ' + $_.FullName >> '%outputDir%\deleted_files.log' }"
 set "psScript+= }"
 
 rem Execute PowerShell script
-powershell -Command "!psScript!"
+powershell -ExecutionPolicy Bypass -Command "!psScript!"
 
 :end
 exit /b
