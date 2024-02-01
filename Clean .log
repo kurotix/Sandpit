@@ -19,7 +19,7 @@ echo Current Date and Time: !datetime!
 echo Cutoff Time: !cutoffTime!
 
 rem Delete files and folders modified more than 2 hours ago
-for /f "delims=" %%a in ('powershell Get-ChildItem -Path "%targetDir%" -Recurse ^| Where-Object {($_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes%))}') do (
+for /f "delims=" %%a in ('powershell Get-ChildItem -Path "%targetDir%" -Recurse ^| Where-Object {$_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes)}) do (
     if exist "%%a" (
         if exist "%%a" (rd /s /q "%%a") else (del /q "%%a" & echo Deleted: "%%a" >> "%outputDir%\deleted_files.log")
     )
