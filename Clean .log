@@ -5,18 +5,4 @@ set "targetDir=E:\protected\scan fortify\sca21.2\build"
 set "outputDir=E:\protected\Scripts_clean_global\statut_clean_40fy_trace_build"
 set "cutoffTimeMinutes=120"
 
-rem Get current time
-for /f "delims=" %%a in ('powershell -Command "& {Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'}"') do set "datetime=%%a"
-
-rem Convert cutoff time back to HH:mm format
-set /a "cutoffHH=cutoffTimeMinutes/60"
-set /a "cutoffMM=cutoffTimeMinutes%%60"
-if !cutoffHH! lss 10 set "cutoffHH=0!cutoffHH!"
-if !cutoffMM! lss 10 set "cutoffMM=0!cutoffMM!"
-set "cutoffTime=!cutoffHH!:!cutoffMM!"
-
-echo Current Date and Time: !datetime!
-echo Cutoff Time: !cutoffTime!
-
-rem PowerShell script to delete files and folders modified more than 2 hours ago
-powershell -ExecutionPolicy Bypass -Command "& {Get-ChildItem -Path '%targetDir%' -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddMinutes(-%cutoffTimeMinutes))} | ForEach-Object { Remove-Item -Recurse -Force $_.FullName; echo 'Deleted: ' + $_.FullName >> '%outputDir%\deleted_files.log' }}"
+powershell -ExecutionPolicy Bypass -File cleanup.ps1 -targetDir "%targetDir%" -outputDir "%outputDir%" -cutoffTimeMinutes %cutoffTimeMinutes%
