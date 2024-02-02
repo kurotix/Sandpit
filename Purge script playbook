@@ -1,0 +1,59 @@
+- name: Créer les répertoires nécessaires et copier les scripts
+  hosts: votre_hôte
+  tasks:
+    - name: Créer le répertoire E:/Ilyes s'il n'existe pas
+      file:
+        path: E:/Ilyes
+        state: directory
+      delegate_to: localhost
+
+    - name: Créer le répertoire E:/protected/Scripts_cleans_global/Scripts Cleans Exécutable/
+      file:
+        path: E:/protected/Scripts_cleans_global/Scripts Cleans Exécutable/
+        state: directory
+      delegate_to: localhost
+
+    - name: Créer le répertoire E:/protected/Scripts_cleans_global/Statut_par_script/scripts_cleans_files_log/
+      file:
+        path: E:/protected/Scripts_cleans_global/Statut_par_script/scripts_cleans_files_log/
+        state: directory
+      delegate_to: localhost
+
+    - name: Créer le répertoire E:/protected/Scripts_cleans_global/Statut_par_script/statut_clean_workspace/
+      file:
+        path: E:/protected/Scripts_cleans_global/Statut_par_script/statut_clean_workspace/
+        state: directory
+      delegate_to: localhost
+
+    - name: Copier le fichier ilyes.bat.j2
+      template:
+        src: templates/ilyes.bat.j2
+        dest: D:/Ilyes/ilyes.bat
+      delegate_to: localhost
+
+    - name: Copier le fichier Nassim.bat.j2
+      template:
+        src: templates/Nassim.bat.j2
+        dest: D:/Ilyes/Nassim.bat
+      delegate_to: localhost
+
+    - name: Copier le fichier ilyes.ps1.j2
+      template:
+        src: templates/ilyes.ps1.j2
+        dest: E:/Ilyes/Ilyes.ps1
+      delegate_to: localhost
+
+- name: Planifier l'exécution des scripts toutes les heures
+  hosts: votre_hôte
+  tasks:
+    - name: Créer la tâche planifiée pour Ilyes.bat
+      win_shell: |
+        $action = New-ScheduledTaskAction -Execute 'D:\Ilyes\ilyes.bat'
+        $trigger = New-ScheduledTaskTrigger -Daily -At '00:00' -RepetitionInterval ([TimeSpan]::FromHours(1))
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName 'IlyesScript' -Force
+
+    - name: Créer la tâche planifiée pour Nassim.bat
+      win_shell: |
+        $action = New-ScheduledTaskAction -Execute 'D:\Ilyes\Nassim.bat'
+        $trigger = New-ScheduledTaskTrigger -Daily -At '00:00' -RepetitionInterval ([TimeSpan]::FromHours(1))
+        Register-ScheduledTask -Action $action -Trigger $trigger -TaskName 'NassimScript' -Force
