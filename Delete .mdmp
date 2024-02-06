@@ -5,9 +5,9 @@ search_path = os.path.join(drive, "jenkins-*")
 
 for root, dirs, files in os.walk(search_path):
     for file in files:
-        if file.endswith(".mdmp"):
+        if file.startswith("hs_err") and file.endswith(".mdmp"):
             file_path = os.path.join(root, file)
             print("Suppression du fichier :", file_path)
             os.remove(file_path)
 
-print("Suppression des fichiers .mdmp terminée.")
+print("Suppression des fichiers .mdmp commençant par 'hs_err' terminée.")
