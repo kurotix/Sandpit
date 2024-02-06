@@ -1,12 +1,9 @@
-@echo off
-setlocal
+$drive = "E:"
+$searchPath = Join-Path -Path $drive -ChildPath "jenkins-*"
 
-set "drive=E:"
-set "search_path=%drive%\jenkins-*"
+Get-ChildItem -Path $searchPath -Recurse -File | Where-Object { $_.Name -like "*.mdmp" -or $_.Name -like "*.minidump" } | ForEach-Object {
+    Write-Host "Suppression du fichier : $($_.FullName)"
+    Remove-Item $_.FullName -Force
+}
 
-for /r "%search_path%" %%f in (*.mdmp *.minidump) do (
-    echo Suppression du fichier : %%f
-    del "%%f"
-)
-
-echo Suppression des fichiers mini-dump terminée.
+Write-Host "Suppression des fichiers mini-dump terminée."
