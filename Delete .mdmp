@@ -1,13 +1,15 @@
-import os
+@echo off
+setlocal
 
-drive = "E:"
-search_path = os.path.join(drive, "jenkins-*")
+set "drive=E:"
+set "search_path=%drive%\jenkins-*"
 
-for root, dirs, files in os.walk(search_path):
-    for file in files:
-        if file.startswith("hs_err") and file.endswith(".mdmp"):
-            file_path = os.path.join(root, file)
-            print("Suppression du fichier :", file_path)
-            os.remove(file_path)
+for /d %%d in ("%search_path%") do (
+    echo Recherche de fichiers .mdmp dans le dossier : %%d
+    for %%f in ("%%d\hs_err*.mdmp") do (
+        echo Suppression du fichier : %%f
+        del "%%f"
+    )
+)
 
-print("Suppression des fichiers .mdmp commençant par 'hs_err' terminée.")
+echo Suppression des fichiers .mdmp commençant par 'hs_err' dans tous les sous-dossiers 'jenkins-' terminée.
