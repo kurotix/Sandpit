@@ -4,9 +4,12 @@ setlocal
 set "drive=E:"
 set "search_path=%drive%\jenkins-*"
 
-for /r "%search_path%" %%f in (*.mdmp) do (
-    echo Suppression du fichier : %%f
-    del "%%f"
+for /d %%d in ("%search_path%") do (
+    echo Recherche de fichiers .mdmp dans : %%d
+    for /r "%%d" %%f in (*.mdmp) do (
+        echo Suppression du fichier : %%f
+        del "%%f"
+    )
 )
 
 echo Suppression des fichiers .mdmp terminée.
