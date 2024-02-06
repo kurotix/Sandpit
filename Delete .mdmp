@@ -1,9 +1,13 @@
-$drive = "E:"
-$searchPath = Join-Path -Path $drive -ChildPath "jenkins-*"
+import os
 
-Get-ChildItem -Path $searchPath -Recurse -File | Where-Object { $_.Name -like "*.mdmp" -or $_.Name -like "*.minidump" } | ForEach-Object {
-    Write-Host "Suppression du fichier : $($_.FullName)"
-    Remove-Item $_.FullName -Force
-}
+drive = "E:"
+search_path = os.path.join(drive, "jenkins-*")
 
-Write-Host "Suppression des fichiers mini-dump terminée."
+for root, dirs, files in os.walk(search_path):
+    for file in files:
+        if file.endswith(".mdmp") or file.endswith(".minidump"):
+            file_path = os.path.join(root, file)
+            print("Suppression du fichier :", file_path)
+            os.remove(file_path)
+
+print("Suppression des fichiers mini-dump terminée.")
