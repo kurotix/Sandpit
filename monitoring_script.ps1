@@ -33,7 +33,8 @@ function CheckJenkinsNodeStatus {
 function RestartVMService {
     # Ajoutez ici le code pour redémarrer le service sur votre VM
     # Par exemple :
-    Restart-Service -Name "nom_du_service" -Force
+    $restartResult = Restart-Service -Name "nom_du_service" -Force
+    return $restartResult
 }
 
 # Boucle principale
@@ -44,7 +45,12 @@ while ($true) {
             Write-Output "Le nœud Jenkins est en ligne et a le label 'windows_58'. Tout est bon."
         } else {
             Write-Output "Le nœud Jenkins est hors ligne ou n'a pas le bon label. Redémarrage des services..."
-            RestartVMService
+            $restartResult = RestartVMService
+            if ($restartResult -eq $true) {
+                Write-Output "Le redémarrage du service a été effectué avec succès."
+            } else {
+                Write-Output "Échec du redémarrage du service."
+            }
         }
     }
     
