@@ -1,7 +1,7 @@
-# Définir les informations d'identification pour accéder à Jenkins
+# Définir les informations d'identification pour accéder à Jenkins avec un token d'API
 $jenkinsUsername = "votre_nom_utilisateur"
-$jenkinsPassword = ConvertTo-SecureString "votre_mot_de_passe" -AsPlainText -Force
-$jenkinsCredential = New-Object System.Management.Automation.PSCredential ($jenkinsUsername, $jenkinsPassword)
+$jenkinsAPIToken = "votre_token_api"
+$jenkinsCredential = New-Object System.Management.Automation.PSCredential ($jenkinsUsername, (ConvertTo-SecureString -String $jenkinsAPIToken -AsPlainText -Force))
 
 # Définir l'URL de l'API Jenkins pour obtenir l'état du nœud
 $jenkinsNodeAPI = "https://toto-devops.group/p-1451-ilyes/api/json"
@@ -51,3 +51,7 @@ while ($true) {
     # Attendre 5 minutes avant de vérifier à nouveau
     Start-Sleep -Seconds 300
 }
+
+# Fin du script
+Write-Output "Le script a terminé son travail. Arrêt du script."
+exit
