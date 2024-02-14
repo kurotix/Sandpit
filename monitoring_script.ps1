@@ -36,47 +36,24 @@ function RestartVMService {
     Restart-Service -Name "nom_du_service" -Force
 }
 
-# Boucle principale
-while ($true) {
-    $nodeStatus = CheckJenkinsNodeStatus
-    if ($nodeStatus -ne $null) {
-        if ($nodeStatus -eq $true) {
-            Write-Output "Le nœud Jenkins est en ligne et a le label 'windows_58'. Tout est bon."
+# Vérifier le statut du nœud Jenkins
+$nodeStatus = CheckJenkinsNodeStatus
+if ($nodeStatus -eq $true) {
+    Write-Output "Le nœud Jenkins est en ligne et a le label 'windows_58'. Tout est bon. Arrêt du script."
+} else {
+    Write-Output "Le nœud Jenkins est hors ligne ou n'a pas le bon label. Redémarrage des services..."
+    $restartResult = RestartVMService
+    if ($restartResult -eq $true) {
+        Write-Output "Le redémarrage du service a été effectué avec succès. Vérification du statut du nœud Jenkins après le redémarrage du service..."
+        $nodeStatusAfterRestart = CheckJenkinsNodeStatus
+        if ($nodeStatusAfterRestart -eq $true) {
+            Write-Output "Le nœud Jenkins est en ligne après le redémarrage du service. Tout est bon."
         } else {
-            Write-Output "Le nœud Jenkins est hors ligne ou n'a pas le bon label. Redémarrage des services..."
-            $restartResult = RestartVMService
-            if ($restartResult -eq $true) {
-                Write-Output "Le redémarrage du service a été effectué avec succès. Vérification du statut du nœud Jenkins après le redémarrage du service..."
-                # Attendre jusqu'à 5 secondes maximum avant de vérifier à nouveau
-                $timeout = 5
-                $startTime = Get-Date
-                $nodeStatusAfterRestart = $false
-                while ((Get-Date) - $startTime -lt ([TimeSpan]::FromSeconds($timeout))) {
-                    Start-Sleep -Seconds 1
-                    $nodeStatusAfterRestart = CheckJenkinsNodeStatus
-                    if ($nodeStatusAfterRestart -eq $true) {
-                        Write-Output "Le nœud Jenkins est en ligne après le redémarrage du service. Tout est bon."
-                        break
-                    }
-                }
-                if ($nodeStatusAfterRestart -ne $true) {
-                    Write-Output "Le nœud Jenkins n'est pas en ligne après le redémarrage du service. Nouvelle tentative dans 5 secondes..."
-                    Start-Sleep -Seconds 5
-                    $nodeStatusAfterRestart = CheckJenkinsNodeStatus
-                    if ($nodeStatusAfterRestart -eq $true) {
-                        Write-Output "Le nœud Jenkins est en ligne après la deuxième tentative. Tout est bon."
-                    } else {
-                        Write-Output "Échec de la vérification du nœud Jenkins après la deuxième tentative."
-                    }
-                }
-            } else {
-                Write-Output "Échec du redémarrage du service."
-            }
+            Write-Output "Échec de la vérification du nœud Jenkins après le redémarrage du service."
         }
+    } else {
+        Write-Output "Échec du redémarrage du service."
     }
-    
-    # Attendre 5 minutes avant de vérifier à nouveau
-    Start-Sleep -Seconds 300
 }
 
 # Fin du script
