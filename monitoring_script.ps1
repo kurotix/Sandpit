@@ -33,8 +33,7 @@ function CheckJenkinsNodeStatus {
 function RestartVMService {
     # Ajoutez ici le code pour redémarrer le service sur votre VM
     # Par exemple :
-    $restartResult = Restart-Service -Name "nom_du_service" -Force
-    return $restartResult
+    Restart-Service -Name "nom_du_service" -Force
 }
 
 # Boucle principale
@@ -47,7 +46,21 @@ while ($true) {
             Write-Output "Le nœud Jenkins est hors ligne ou n'a pas le bon label. Redémarrage des services..."
             $restartResult = RestartVMService
             if ($restartResult -eq $true) {
-                Write-Output "Le redémarrage du service a été effectué avec succès."
+                Write-Output "Le redémarrage du service a été effectué avec succès. Vérification du statut du nœud Jenkins..."
+                # Attendre jusqu'à 20 secondes maximum avant de vérifier à nouveau
+                $timeout = 20
+                $startTime = Get-Date
+                while ((Get-Date) - $startTime -lt ([TimeSpan]::FromSeconds($timeout))) {
+                    Start-Sleep -Seconds 1
+                    $nodeStatusAfterRestart = CheckJenkinsNodeStatus
+                    if ($nodeStatusAfterRestart -eq $true) {
+                        Write-Output "Le nœud Jenkins est en ligne après le redémarrage du service. Tout est bon."
+                        break
+                    }
+                }
+                if ($nodeStatusAfterRestart -ne $true) {
+                    Write-Output "Échec de la vérification du nœud Jenkins après le redémarrage du service."
+                }
             } else {
                 Write-Output "Échec du redémarrage du service."
             }
