@@ -50,6 +50,7 @@ while ($true) {
                 # Attendre jusqu'à 20 secondes maximum avant de vérifier à nouveau
                 $timeout = 20
                 $startTime = Get-Date
+                $nodeStatusAfterRestart = $false
                 while ((Get-Date) - $startTime -lt ([TimeSpan]::FromSeconds($timeout))) {
                     Start-Sleep -Seconds 1
                     $nodeStatusAfterRestart = CheckJenkinsNodeStatus
