@@ -26,11 +26,7 @@ try {
     if ($nodeFound) {
         # Vérifier si le nœud est en ligne (offline: false)
         $offlineStatus = $response.offline
-        if ($offlineStatus -eq $false) {
-            Write-Output "Le nœud Jenkins est en ligne avec le label 'windows_58'."
-        } else {
-            Write-Output "Le nœud Jenkins est hors ligne avec le label 'windows_58'."
-        }
+        Write-Output "Le nœud Jenkins avec le label 'windows_58' est en ligne: $($offlineStatus -eq $false)"
     } else {
         Write-Output "Le nœud Jenkins avec le label 'windows_58' n'a pas été trouvé."
     }
