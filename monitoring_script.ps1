@@ -1,6 +1,15 @@
 # Définir le chemin du répertoire contenant les dossiers Jenkins
 $jenkinsDir = "E:/"
 
+# Définir le nom d'utilisateur et le token d'API Jenkins
+$jenkinsUsername = "votre_nom_utilisateur"
+$jenkinsAPIToken = "votre_token_api"
+
+# Créer l'en-tête d'authentification avec le nom d'utilisateur et le token d'API
+$headers = @{
+    Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($jenkinsUsername):$($jenkinsAPIToken)"))
+}
+
 # Obtenir la liste des dossiers commençant par "jenkins-" dans le répertoire spécifié
 $jenkinsFolders = Get-ChildItem -Path $jenkinsDir -Directory | Where-Object { $_.Name -like "jenkins-*" -and $_.Name -match "p-\d{4}-\w+" }
 
@@ -11,11 +20,6 @@ foreach ($folder in $jenkinsFolders) {
     try {
         # Définir l'URL de l'API Jenkins pour ce nœud
         $jenkinsURL = "https://toto.group/p-$finalName/computer/api/json"
-
-        # Créer l'en-tête d'authentification avec le nom d'utilisateur et le token d'API
-        $headers = @{
-            Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($jenkinsUsername):$($jenkinsAPIToken)"))
-        }
 
         # Exécuter une requête HTTP GET vers l'API Jenkins pour obtenir l'état du nœud
         $response = Invoke-RestMethod -Uri $jenkinsURL -Headers $headers -Method Get
