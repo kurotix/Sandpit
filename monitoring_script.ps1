@@ -14,13 +14,9 @@ try {
     # Exécuter une requête HTTP GET vers l'API Jenkins pour obtenir l'état du nœud
     $response = Invoke-RestMethod -Uri $jenkinsURL -Headers $headers -Method Get
 
-    # Vérifier si "windows_58" est présent dans "DisplayName"
+    # Afficher la valeur de "DisplayName"
     $displayName = $response.displayName
-    if ($displayName -eq "windows_58") {
-        Write-Output "Le nœud Jenkins a le label 'windows_58'."
-    } else {
-        Write-Output "Le nœud Jenkins n'a pas le label 'windows_58'."
-    }
+    Write-Output "La valeur de 'DisplayName' est : $displayName"
 
 } catch {
     # En cas d'erreur lors de la requête
