@@ -1,17 +1,9 @@
 # Définir l'URL de l'API Jenkins
 $jenkinsURL = "https://toto.group/p-2724-ilyes/api/json"
 
-# Définir le jeton d'API
-$jenkinsAPIToken = "votre_token_api"
-
 try {
-    # Créer l'en-tête d'authentification avec le jeton d'API
-    $headers = @{
-        Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$jenkinsAPIToken"))
-    }
-
     # Exécuter une requête HTTP GET vers l'API Jenkins pour obtenir l'état du nœud
-    $response = Invoke-RestMethod -Uri $jenkinsURL -Headers $headers -Method Get
+    $response = Invoke-RestMethod -Uri $jenkinsURL -Method Get
 
     # Vérifier si le nœud est présent dans le bloc "assignedLabels" avec le nom "windows_58"
     $nodeFound = $false
