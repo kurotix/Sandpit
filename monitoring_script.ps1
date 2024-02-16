@@ -10,12 +10,12 @@ $headers = @{
     Authorization = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($jenkinsUsername):$($jenkinsAPIToken)"))
 }
 
-# Obtenir la liste des dossiers commençant par "jenkins-" dans le répertoire spécifié
-$jenkinsFolders = Get-ChildItem -Path $jenkinsDir -Directory | Where-Object { $_.Name -like "jenkins-*" -and $_.Name -match "p-\d{4}-\w+" }
+# Obtenir la liste des dossiers commençant par "Jenkins-" dans le répertoire spécifié
+$jenkinsFolders = Get-ChildItem -Path $jenkinsDir -Directory | Where-Object { $_.Name -like "Jenkins-p-*" }
 
 foreach ($folder in $jenkinsFolders) {
-    # Extraire le nom final du dossier (par exemple, "p-1713-ilyes")
-    $finalName = ($folder.Name -split "jenkins-")[-1]
+    # Extraire le nom final du dossier (par exemple, "p-1210-ilyes")
+    $finalName = ($folder.Name -split "Jenkins-p-")[-1]
 
     try {
         # Définir l'URL de l'API Jenkins pour ce nœud
