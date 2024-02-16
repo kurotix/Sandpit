@@ -14,22 +14,12 @@ try {
     # Exécuter une requête HTTP GET vers l'API Jenkins pour obtenir l'état du nœud
     $response = Invoke-RestMethod -Uri $jenkinsURL -Headers $headers -Method Get
 
-    # Vérifier si le nœud est présent dans le bloc "assignedLabels" avec le nom "windows_58"
-    $nodeFound = $false
+    # Afficher tous les labels présents dans la réponse
+    Write-Output "Labels présents dans la réponse :"
     foreach ($label in $response.assignedLabels) {
-        if ($label.name -eq "windows_58") {
-            $nodeFound = $true
-            break
-        }
+        Write-Output "- $($label.name)"
     }
 
-    if ($nodeFound) {
-        # Vérifier si le nœud est en ligne (offline: false)
-        $offlineStatus = $response.offline
-        Write-Output "Le nœud Jenkins avec le label 'windows_58' est en ligne: $($offlineStatus -eq $false)"
-    } else {
-        Write-Output "Le nœud Jenkins avec le label 'windows_58' n'a pas été trouvé."
-    }
 } catch {
     # En cas d'erreur lors de la requête
     Write-Output "Erreur lors de la requête vers l'API Jenkins : $_"
