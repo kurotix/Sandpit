@@ -14,10 +14,10 @@ try {
     # Exécuter une requête HTTP GET vers l'API Jenkins pour obtenir l'état du nœud
     $response = Invoke-RestMethod -Uri $jenkinsURL -Headers $headers -Method Get
 
-    # Afficher tous les labels présents dans la réponse
-    Write-Output "Labels présents dans la réponse :"
-    foreach ($label in $response.assignedLabels) {
-        Write-Output "- $($label.name)"
+    # Afficher les valeurs de "name" présentes dans la réponse
+    Write-Output "Valeurs de 'name' présentes dans la réponse :"
+    foreach ($assignedLabel in $response.assignedLabels) {
+        Write-Output "- $($assignedLabel.name)"
     }
 
 } catch {
