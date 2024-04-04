@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Clone') {
+            parallel {
+                stage('Clone on toto1') {
+                    agent {
+                        label 'toto1'
+                    }
+                    steps {
+                        // Commandes pour le clonage
+                    }
+                }
+                stage('Clone on toto2') {
+                    agent {
+                        label 'toto2'
+                    }
+                    steps {
+                        // Commandes pour le clonage
+                    }
+                }
+            }
+        }
+        stage('Run Java') {
+            parallel {
+                stage('Java on toto1') {
+                    agent {
+                        label 'toto1'
+                    }
+                    steps {
+                        // Commandes pour exécuter du Java
+                    }
+                }
+                stage('Java on toto2') {
+                    agent {
+                        label 'toto2'
+                    }
+                    steps {
+                        // Commandes pour exécuter du Java
+                    }
+                }
+            }
+        }
+    }
+}
