@@ -1,4 +1,5 @@
 import com.cloudbees.opscenter.server.model.ManagedMaster
+import java.util.regex.*
 
 // Liste des noms des masters Jenkins à modifier
 def mastersToModify = ["p-ilyes-78", "p-nassim-78"]
@@ -17,20 +18,30 @@ def changeMasterMemory(def managedController) {
     if (instance != null) {
         def configuration = instance.getConfiguration()
         if (configuration != null) {
-            def provisioning = configuration.getProvisioning() // Accès à la section Provisioning
+            def yaml = configuration.getYaml()
             
-            // Supposons que la propriété "jenkinsMasterMemoryMb" soit la bonne, mais vous pouvez ajuster le nom de la propriété selon votre configuration.
-            def currentMemory = provisioning.jenkinsMasterMemoryMb
-            println "Mémoire actuelle pour '${managedController.fullName}': ${currentMemory}MB"
+            // Affichage du YAML complet pour le débogage
+            println "YAML pour '${managedController.fullName}':"
+            println yaml
             
-            def newMemory = currentMemory + 2048  // Ajouter 2 Go (2048 Mo) à la valeur actuelle
-            
-            provisioning.jenkinsMasterMemoryMb = newMemory  // Mettre à jour la valeur
-            
-            instance.setConfiguration(configuration)
-            instance.save()
-            
-            println "RAM pour le master '${managedController.fullName}' mise à jour avec succès à ${newMemory}MB."
+            // Expression régulière pour trouver la mémoire actuelle en MB
+            Matcher memoryMatcher = Pattern.compile("jenkinsMasterMemoryMb:\\s*(\\d+)").matcher(yaml)
+            if (memoryMatcher.find()) {
+                def currentMemory = memoryMatcher.group(1).toInteger()
+                def newMemory = currentMemory + 2048  // Ajouter 2 Go (2048 Mo) à la valeur actuelle
+                
+                // Mise à jour de la valeur de la mémoire dans le YAML
+                def updatedYaml = yaml.replaceFirst("jenkinsMasterMemoryMb:\\s*\\d+", "jenkinsMasterMemoryMb: ${newMemory}")
+                
+                // Appliquer la nouvelle configuration YAML
+                configuration.setYaml(updatedYaml)
+                instance.setConfiguration(configuration)
+                instance.save()
+                
+                println "RAM pour le master '${managedController.fullName}' mise à jour avec succès à ${newMemory}MB."
+            } else {
+                println "Aucune configuration de RAM trouvée pour '${managedController.fullName}'."
+            }
         }
     }
 }
