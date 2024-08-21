@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 login_url = 'https://toto.echonet/cjoc/login'
 target_url = 'https://toto.echonet/cjoc/p-ilyes-78/configure'
 
+# Chemin vers le certificat CA (remplacez par le chemin réel)
+cert_path = '/path/to/certificate.pem'
+
 # Créer une session
 session = requests.Session()
 
@@ -14,15 +17,15 @@ login_data = {
     'password': 'your-password',
 }
 
-# Effectuer la connexion avec verification SSL désactivée
-response = session.post(login_url, data=login_data, verify=False)
+# Effectuer la connexion en spécifiant le chemin du certificat CA
+response = session.post(login_url, data=login_data, verify=cert_path)
 
 # Vérifier si la connexion a réussi
 if response.ok:
     print("Connexion réussie")
 
     # Accéder à la page protégée
-    response = session.get(target_url, verify=False)
+    response = session.get(target_url, verify=cert_path)
 
     # Vérifier si la demande a réussi
     if response.ok:
