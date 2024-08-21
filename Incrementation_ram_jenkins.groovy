@@ -1,51 +1,52 @@
-import jenkins.model.Jenkins
-import hudson.slaves.DumbSlave
+import com.cloudbees.opscenter.server.model.ManagedMaster
+import java.util.regex.*
 
-// Liste des noms des masters Jenkins
-def masters = ["p-ilyes-78", "p-nassim-78"]
+// Liste des noms des masters Jenkins à modifier
+def mastersToModify = ["p-ilyes-78", "p-nassim-78"]
 
-// Parcourir chaque master dans la liste
-masters.each { masterName ->
-    // Récupérer l'objet Slave (agent) correspondant au master
-    def masterNode = Jenkins.instance.getNode(masterName)
-    
+// Parcourir chaque master dans la liste et appliquer les modifications si le master existe
+mastersToModify.each { masterName ->
+    def masterNode = Jenkins.instance.getAllItems(ManagedMaster.class).find { it.fullName == masterName }
     if (masterNode) {
-        // Récupérer la configuration existante de la RAM (Xmx)
-        def jvmOptions = masterNode.getLauncher().getLaunchCommand()
-        
-        // Extraire la valeur actuelle de la RAM à partir des options JVM
-        def ramOptionMatch = jvmOptions.find(/-Xmx(\d+)([mMgG])/)
-        if (ramOptionMatch) {
-            def currentRamValue = ramOptionMatch[1].toInteger()
-            def currentRamUnit = ramOptionMatch[2].toLowerCase()
-
-            // Calculer la nouvelle RAM (ajouter +2G)
-            def newRamValue = currentRamUnit == 'g' ? currentRamValue + 2 : (currentRamValue / 1024) + 2
-            def newRamOption = "-Xmx${newRamValue}g"
-
-            // Mettre à jour les options JVM avec la nouvelle valeur de RAM
-            jvmOptions = jvmOptions.replaceAll(/-Xmx\d+[mMgG]/, newRamOption)
-            masterNode.getLauncher().setLaunchCommand(jvmOptions)
-
-            // Enregistrer la configuration mise à jour
-            masterNode.save()
-
-            println "RAM pour le master '${masterName}' mise à jour avec succès : ${newRamOption}"
-        } else {
-            println "RAM non trouvée pour le master '${masterName}'. Aucune modification effectuée."
-        }
+        changeRequestsMemory(masterNode)
     } else {
-        println "Master '${masterName}' introuvable. Aucune modification effectuée."
+        println "Master '${masterName}' introuvable."
     }
 }
 
-// Redémarrer les nodes pour appliquer les changements si nécessaire
-masters.each { masterName ->
-    def masterNode = Jenkins.instance.getNode(masterName)
-    if (masterNode) {
-        masterNode.toComputer().disconnect(new hudson.slaves.OfflineCause.ByCLI("Mise à jour de la RAM"))
-        masterNode.toComputer().connect(true)
+def changeRequestsMemory(def managedMaster) {
+    def configuration = managedMaster.getConfiguration()
+    if (configuration != null) {
+        def yaml = configuration.getYaml()
+
+        // Trouver la valeur actuelle de la mémoire
+        Matcher subMatcher = Pattern.compile("memory:\\s*\"([0-9]+)([mMgG])\"").matcher(yaml)
+        if (subMatcher.find()) {
+            def currentMemoryValue = subMatcher.group(1).toInteger()
+            def currentMemoryUnit = subMatcher.group(2).toLowerCase()
+
+            // Convertir la mémoire en GB si nécessaire
+            if (currentMemoryUnit == 'm') {
+                currentMemoryValue = currentMemoryValue / 1024
+            }
+
+            // Ajouter 2 Go à la mémoire actuelle
+            def newMemoryValue = currentMemoryValue + 2
+
+            // Créer la nouvelle chaîne de mémoire avec le format correct
+            def newMemoryString = "memory: \"${newMemoryValue}g\""
+
+            // Remplacer la valeur de la mémoire dans le YAML
+            def yamlNew = yaml.replaceAll("memory:\\s*\"[0-9]+[mMgG]\"", newMemoryString)
+
+            // Appliquer la nouvelle configuration YAML
+            configuration.setYaml(yamlNew)
+            managedMaster.setConfiguration(configuration)
+            managedMaster.save()
+
+            println "RAM pour le master '${managedMaster.fullName}' mise à jour à ${newMemoryValue} Go"
+        } else {
+            println "Aucune configuration de RAM trouvée pour '${managedMaster.fullName}'."
+        }
     }
 }
-
-println "Script terminé."
