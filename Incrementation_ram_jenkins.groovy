@@ -1,47 +1,35 @@
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import requests
+from bs4 import BeautifulSoup
 
-# Configuration des options pour le navigateur
-chrome_options = Options()
-# Activer le mode headless si nécessaire (décommentez la ligne suivante)
-# chrome_options.add_argument("--headless")
+# URL de connexion
+login_url = 'https://toto.echonet/cjoc/login'  # Remplacez par l'URL de connexion réelle
+target_url = 'https://toto.echonet/cjoc/p-ilyes-78/configure'  # URL de la page à accéder après connexion
 
-# Initialiser le service ChromeDriver avec webdriver-manager
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
+# Créer une session
+session = requests.Session()
 
-try:
-    # Accéder à la page de connexion
-    driver.get('https://toto.echonet/cjoc/')
+# Les données de connexion (modifiez en fonction du formulaire de connexion)
+login_data = {
+    'username': 'your-username',  # Remplacez par votre nom d'utilisateur
+    'password': 'your-password',  # Remplacez par votre mot de passe
+}
 
-    # Attendre que les éléments de connexion soient chargés
-    wait = WebDriverWait(driver, 10)
+# Effectuer la connexion
+response = session.post(login_url, data=login_data)
 
-    # Exemple de connexion (remplacez par les sélecteurs et les données de connexion corrects)
-    username_input = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
-    password_input = driver.find_element(By.NAME, 'password')
+# Vérifier si la connexion a réussi
+if response.ok:
+    print("Connexion réussie")
 
-    # Saisir les informations de connexion
-    username_input.send_keys('your-username')  # Remplacez par votre nom d'utilisateur
-    password_input.send_keys('your-password')  # Remplacez par votre mot de passe
-    password_input.send_keys(Keys.RETURN)  # Soumettre le formulaire
+    # Accéder à la page protégée
+    response = session.get(target_url)
 
-    # Attendre que la page d'accueil après connexion soit chargée
-    wait.until(EC.url_to_be('https://toto.echonet/cjoc/'))
-
-    # Accéder à la page spécifique
-    driver.get('https://toto.echonet/cjoc/p-ilyes-78/configure')
-
-    # Attendre que le contenu de la page soit chargé
-    page_content = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-    print(page_content.text)
-
-finally:
-    # Fermer le navigateur
-    driver.quit()
+    # Vérifier si la demande a réussi
+    if response.ok:
+        # Afficher le contenu de la page
+        soup = BeautifulSoup(response.text, 'html.parser')
+        print(soup.prettify())
+    else:
+        print(f"Erreur lors de l'accès à la page protégée : {response.status_code}")
+else:
+    print(f"Erreur de connexion : {response.status_code}")
