@@ -1,39 +1,42 @@
 import com.cloudbees.opscenter.server.model.ManagedMaster
 
-// Fonction pour augmenter la mémoire
-def increaseMemory(configXml, increment) {
-    return configXml.replaceAll(/-Xmx(\d+)g/, { match, x -> "-Xmx${x.toInteger() + increment}g" })
+def increaseMemory = { memoryMB, incrementGB ->
+    return memoryMB + (incrementGB * 1024)
 }
 
-// Liste des Managed Masters à modifier
-def masters = ["p-ilyes-78", "p-nassim-78"]
-def increment = 2 // Ajouter 2G de RAM
+def updateMemoryForMasters = { masterNames, incrementGB ->
+    masterNames.each { masterName ->
+        def master = Jenkins.instance.getAllItems(ManagedMaster.class).find { it.name == masterName }
 
-masters.each { masterName ->
-    def master = Jenkins.instance.getAllItems(ManagedMaster.class).find { it.name == masterName }
+        if (master != null) {
+            println "Updating Memory for Master: ${master.name}"
 
-    if (master != null) {
-        println "Modifying Master: ${master.name}"
+            // Lire la valeur actuelle de la mémoire
+            def currentMemoryMB = master.getProperties().get(com.cloudbees.opscenter.server.model.JM2MemoryLimit).getMemoryLimitMB()
+            println "Current Memory for ${master.name}: ${currentMemoryMB} MB"
 
-        // Obtenir la configuration actuelle du Managed Master
-        def configXml = master.getConfigFile().asString()
-        println "Current Config for ${masterName}: \n$configXml"
+            // Augmenter la mémoire de 2G
+            def newMemoryMB = increaseMemory(currentMemoryMB, incrementGB)
+            println "New Memory for ${master.name}: ${newMemoryMB} MB"
 
-        // Augmenter la mémoire de 2G
-        def updatedConfigXml = increaseMemory(configXml, increment)
+            // Mettre à jour la nouvelle valeur de mémoire
+            master.getProperties().get(com.cloudbees.opscenter.server.model.JM2MemoryLimit).setMemoryLimitMB(newMemoryMB)
 
-        // Appliquer la nouvelle configuration
-        master.getConfigFile().write(updatedConfigXml)
-        master.save()
+            master.save()
+            println "Memory updated to ${newMemoryMB} MB for ${master.name}"
 
-        println "Updated Memory for ${masterName}."
-
-        // Optionnel : Redémarrer le Managed Master pour appliquer les changements
-        master.doSafeRestart()
-        println "Master ${masterName} is restarting..."
-    } else {
-        println "No such master found: ${masterName}"
+            // Redémarrer le Managed Master pour appliquer les changements
+            master.doSafeRestart()
+            println "Master ${master.name} is restarting..."
+        } else {
+            println "No such master found: ${masterName}"
+        }
     }
 }
+
+def masterNames = ["p-ilyes-78", "p-nassim-78"]
+def incrementGB = 2 // Ajouter 2 Go
+
+updateMemoryForMasters(masterNames, incrementGB)
 
 println "Memory update completed for selected masters."
