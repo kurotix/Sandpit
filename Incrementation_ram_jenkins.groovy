@@ -1,47 +1,47 @@
-import com.cloudbees.opscenter.server.model.ManagedMaster
-import java.util.regex.*
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-// Liste des noms des masters Jenkins à modifier
-def mastersToModify = ["p-ilyes-78", "p-nassim-78"]
+# Configuration des options pour le navigateur
+chrome_options = Options()
+# Activer le mode headless si nécessaire (décommentez la ligne suivante)
+# chrome_options.add_argument("--headless")
 
-// Parcourir chaque master et appliquer les modifications si le master existe dans la liste
-Jenkins.instance.getAllItems(ManagedMaster.class).each { masterInstance ->
-    def nameInstance = masterInstance.fullName
-    if (mastersToModify.contains(nameInstance)) {
-        changeMasterMemory(masterInstance)
-    }
-}
+# Initialiser le service ChromeDriver avec webdriver-manager
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
-def changeMasterMemory(def managedController) {
-    def instance = jenkins.model.Jenkins.instanceOrNull.getItemByFullName(managedController.fullName, ManagedMaster.class)
-    
-    if (instance != null) {
-        def configuration = instance.getConfiguration()
-        if (configuration != null) {
-            def yaml = configuration.getYaml()
-            
-            // Affichage du YAML complet pour le débogage
-            println "YAML pour '${managedController.fullName}':"
-            println yaml
-            
-            // Expression régulière pour trouver la mémoire actuelle en MB
-            Matcher memoryMatcher = Pattern.compile("jenkinsMasterMemoryMb:\\s*(\\d+)").matcher(yaml)
-            if (memoryMatcher.find()) {
-                def currentMemory = memoryMatcher.group(1).toInteger()
-                def newMemory = currentMemory + 2048  // Ajouter 2 Go (2048 Mo) à la valeur actuelle
-                
-                // Mise à jour de la valeur de la mémoire dans le YAML
-                def updatedYaml = yaml.replaceFirst("jenkinsMasterMemoryMb:\\s*\\d+", "jenkinsMasterMemoryMb: ${newMemory}")
-                
-                // Appliquer la nouvelle configuration YAML
-                configuration.setYaml(updatedYaml)
-                instance.setConfiguration(configuration)
-                instance.save()
-                
-                println "RAM pour le master '${managedController.fullName}' mise à jour avec succès à ${newMemory}MB."
-            } else {
-                println "Aucune configuration de RAM trouvée pour '${managedController.fullName}'."
-            }
-        }
-    }
-}
+try:
+    # Accéder à la page de connexion
+    driver.get('https://toto.echonet/cjoc/')
+
+    # Attendre que les éléments de connexion soient chargés
+    wait = WebDriverWait(driver, 10)
+
+    # Exemple de connexion (remplacez par les sélecteurs et les données de connexion corrects)
+    username_input = wait.until(EC.presence_of_element_located((By.NAME, 'username')))
+    password_input = driver.find_element(By.NAME, 'password')
+
+    # Saisir les informations de connexion
+    username_input.send_keys('your-username')  # Remplacez par votre nom d'utilisateur
+    password_input.send_keys('your-password')  # Remplacez par votre mot de passe
+    password_input.send_keys(Keys.RETURN)  # Soumettre le formulaire
+
+    # Attendre que la page d'accueil après connexion soit chargée
+    wait.until(EC.url_to_be('https://toto.echonet/cjoc/'))
+
+    # Accéder à la page spécifique
+    driver.get('https://toto.echonet/cjoc/p-ilyes-78/configure')
+
+    # Attendre que le contenu de la page soit chargé
+    page_content = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+    print(page_content.text)
+
+finally:
+    # Fermer le navigateur
+    driver.quit()
