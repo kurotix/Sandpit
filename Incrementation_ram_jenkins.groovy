@@ -1,38 +1,48 @@
-import requests
-from bs4 import BeautifulSoup
+import jenkins.model.*
+import hudson.model.*
 
-# URL de connexion
-login_url = 'https://toto.echonet/cjoc/login'
-target_url = 'https://toto.echonet/cjoc/p-ilyes-78/configure'
-
-# Chemin vers le certificat CA (remplacez par le chemin réel)
-cert_path = '/path/to/certificate.pem'
-
-# Créer une session
-session = requests.Session()
-
-# Les données de connexion
-login_data = {
-    'username': 'your-username',
-    'password': 'your-password',
+// Fonction pour augmenter la mémoire
+def addMemory(currentMemory, increment) {
+    def unit = currentMemory[-2..-1]
+    def currentValue = currentMemory[0..-3].toInteger()
+    def incrementValue = increment.toInteger()
+    def newValue = currentValue + incrementValue
+    return "${newValue}${unit}"
 }
 
-# Effectuer la connexion en spécifiant le chemin du certificat CA
-response = session.post(login_url, data=login_data, verify=cert_path)
+// Fonction pour modifier la mémoire des masters Jenkins
+def updateMasterMemory(masterName, additionalMemory) {
+    def jenkins = Jenkins.instance
+    def master = jenkins.getNode(masterName)
 
-# Vérifier si la connexion a réussi
-if response.ok:
-    print("Connexion réussie")
+    if (master == null) {
+        println "No such master node: ${masterName}"
+        return
+    }
 
-    # Accéder à la page protégée
-    response = session.get(target_url, verify=cert_path)
+    def launcher = master.getLauncher()
+    def config = master.getNodeProperties().get(hudson.slaves.EnvironmentVariablesNodeProperty.class)
 
-    # Vérifier si la demande a réussi
-    if response.ok:
-        # Afficher le contenu de la page
-        soup = BeautifulSoup(response.text, 'html.parser')
-        print(soup.prettify())
-    else:
-        print(f"Erreur lors de l'accès à la page protégée : {response.status_code}")
-else:
-    print(f"Erreur de connexion : {response.status_code}")
+    if (config == null) {
+        println "No environment variables configured for node: ${masterName}"
+        return
+    }
+
+    def envVars = config.getEnvVars()
+    def currentMemory = envVars.get("JAVA_OPTS") ?: ""
+    def newMemory = addMemory(currentMemory, additionalMemory)
+
+    envVars.put("JAVA_OPTS", newMemory)
+    println "Updated ${masterName} JAVA_OPTS to: ${newMemory}"
+}
+
+// Liste des masters et mémoire à ajouter
+def masters = ["master-1", "master-2", "master-3"]
+def additionalMemory = "2G" // Mémoire à ajouter
+
+// Mise à jour de chaque master
+masters.each { masterName ->
+    updateMasterMemory(masterName, additionalMemory)
+}
+
+println "Memory update completed."
