@@ -19,34 +19,35 @@ def changeRequestsMemory(def managedMaster) {
     if (configuration != null) {
         def yaml = configuration.getYaml()
 
-        // Trouver la valeur actuelle de la mémoire
-        Matcher subMatcher = Pattern.compile("memory:\\s*\"([0-9]+)([mMgG])\"").matcher(yaml)
-        if (subMatcher.find()) {
-            def currentMemoryValue = subMatcher.group(1).toInteger()
-            def currentMemoryUnit = subMatcher.group(2).toLowerCase()
+        // Trouver et mettre à jour la valeur de la mémoire dans `limits` et `requests`
+        yaml = updateMemoryInYaml(yaml, "limits")
+        yaml = updateMemoryInYaml(yaml, "requests")
 
-            // Convertir la mémoire en GB si nécessaire
-            if (currentMemoryUnit == 'm') {
-                currentMemoryValue = currentMemoryValue / 1024
-            }
+        // Appliquer la nouvelle configuration YAML
+        configuration.setYaml(yaml)
+        managedMaster.setConfiguration(configuration)
+        managedMaster.save()
 
-            // Ajouter 2 Go à la mémoire actuelle
-            def newMemoryValue = currentMemoryValue + 2
-
-            // Créer la nouvelle chaîne de mémoire avec le format correct
-            def newMemoryString = "memory: \"${newMemoryValue}g\""
-
-            // Remplacer la valeur de la mémoire dans le YAML
-            def yamlNew = yaml.replaceAll("memory:\\s*\"[0-9]+[mMgG]\"", newMemoryString)
-
-            // Appliquer la nouvelle configuration YAML
-            configuration.setYaml(yamlNew)
-            managedMaster.setConfiguration(configuration)
-            managedMaster.save()
-
-            println "RAM pour le master '${managedMaster.fullName}' mise à jour à ${newMemoryValue} Go"
-        } else {
-            println "Aucune configuration de RAM trouvée pour '${managedMaster.fullName}'."
-        }
+        println "RAM pour le master '${managedMaster.fullName}' mise à jour avec succès."
     }
+}
+
+def updateMemoryInYaml(def yaml, def key) {
+    // Expression régulière pour trouver la mémoire dans la section `limits` ou `requests`
+    Matcher memoryMatcher = Pattern.compile("${key}:\\s*\\{.*memory:\\s*\"([0-9]+)\\.000000[MmGg]\"").matcher(yaml)
+    if (memoryMatcher.find()) {
+        def currentMemoryValue = memoryMatcher.group(1).toInteger()
+
+        // Ajouter 2048M (2G) à la valeur actuelle
+        def newMemoryValue = currentMemoryValue + 2048
+
+        // Créer la nouvelle chaîne de mémoire
+        def newMemoryString = "${key}: {memory: \"${newMemoryValue}.000000M\""
+
+        // Remplacer la valeur de la mémoire dans le YAML
+        yaml = yaml.replaceAll("${key}:\\s*\\{.*memory:\\s*\"[0-9]+\\.000000[MmGg]\"", newMemoryString)
+    } else {
+        println "Aucune configuration de RAM trouvée pour '${key}'."
+    }
+    return yaml
 }
