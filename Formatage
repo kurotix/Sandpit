@@ -2,18 +2,27 @@
 with open('nom_du_fichier.txt', 'r') as file:
     masters = file.readlines()
 
-# Nettoyer et reformater chaque ligne
+# Nettoyer, reformater et retirer le "-0" à la fin de chaque ligne
 formatted_masters = []
 for master in masters:
-    # Enlever les espaces et la virgule au début
+    # Enlever les espaces et la virgule au début, et les espaces en fin
     clean_master = master.strip().lstrip(",").strip()
     
-    # Capitaliser la première lettre et mettre tout le reste en minuscule
-    clean_master = clean_master.capitalize()
+    # Retirer le "-0" à la fin du nom si présent
+    if clean_master.endswith("-0"):
+        clean_master = clean_master[:-2]
     
-    # Ajouter les guillemets autour du nom
-    formatted_masters.append(f'"{clean_master}"')
+    # Vérifier que la ligne n'est pas vide
+    if clean_master:
+        # Ajouter les guillemets autour du nom
+        formatted_masters.append(f'"{clean_master}"')
 
 # Joindre tous les noms par une virgule et les afficher sur une ligne
 result = ",".join(formatted_masters)
+
+# Afficher le résultat pour vérification
 print(result)
+
+# Si nécessaire, écrire le résultat dans un fichier (facultatif)
+with open('formatted_masters.json', 'w') as output_file:
+    output_file.write(f"[{result}]")
