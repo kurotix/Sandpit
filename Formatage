@@ -1,0 +1,19 @@
+# Lire le fichier contenant les noms des masters
+with open('nom_du_fichier.txt', 'r') as file:
+    masters = file.readlines()
+
+# Nettoyer et reformater chaque ligne
+formatted_masters = []
+for master in masters:
+    # Enlever les espaces et la virgule au début
+    clean_master = master.strip().lstrip(",").strip()
+    
+    # Capitaliser la première lettre et mettre tout le reste en minuscule
+    clean_master = clean_master.capitalize()
+    
+    # Ajouter les guillemets autour du nom
+    formatted_masters.append(f'"{clean_master}"')
+
+# Joindre tous les noms par une virgule et les afficher sur une ligne
+result = ",".join(formatted_masters)
+print(result)
