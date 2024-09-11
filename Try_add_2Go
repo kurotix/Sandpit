@@ -1,7 +1,8 @@
 import requests
 from requests.auth import HTTPBasicAuth
+import xml.etree.ElementTree as ET
 
-# Liste des masters à mettre à jour avec leurs valeurs de RAM actuelles
+# Liste des masters à mettre à jour
 masters = ["Ilyes", "Nassim", "Lina"]
 url_base = "https://jenkins.echonet/cjoc/job/"
 username = "votre_nom_d_utilisateur"
@@ -9,30 +10,42 @@ api_token = "votre_token_api"
 
 # Fonction pour incrémenter la RAM de +2 Go
 def increment_ram(master_name):
-    url = f"{url_base}{master_name}/configure"
-    
+    url = f"{url_base}{master_name}/config.xml"
+
     # Effectuer une requête GET pour obtenir la configuration actuelle (bypass SSL avec verify=False)
     response = requests.get(url, auth=HTTPBasicAuth(username, api_token), verify=False)
     
     if response.status_code == 200:
-        # Simuler la récupération de la RAM actuelle à partir de la page HTML/JSON (mettre à jour selon votre besoin)
-        # Ceci est un exemple simplifié, dans un vrai scénario, vous devrez probablement parser le HTML ou JSON de la réponse.
-        print(f"RAM actuelle pour {master_name} : 4096 MB (exemple)")
+        # Parsing du fichier XML pour trouver la valeur de la RAM
+        root = ET.fromstring(response.content)
+        memory_element = root.find(".//memory")
         
-        # Incrémenter de +2048 MB
-        new_ram_value = 4096 + 2048
-        print(f"Nouvelle RAM pour {master_name} : {new_ram_value} MB")
-        
-        # Poster la nouvelle configuration avec la RAM incrémentée (ici un exemple d'envoi POST)
-        data = {
-            'ram': new_ram_value  # Modifier la clé et les données selon la structure exacte du formulaire
-        }
-        post_response = requests.post(url, auth=HTTPBasicAuth(username, api_token), data=data, verify=False)
-        
-        if post_response.status_code == 200:
-            print(f"RAM mise à jour avec succès pour {master_name}")
+        if memory_element is not None:
+            # Récupérer la valeur actuelle de la RAM
+            current_memory = int(memory_element.text)
+            print(f"RAM actuelle pour {master_name} : {current_memory} MB")
+            
+            # Incrémenter de +2048 MB
+            new_memory = current_memory + 2048
+            print(f"Nouvelle RAM pour {master_name} : {new_memory} MB")
+            
+            # Mettre à jour la valeur dans le fichier XML
+            memory_element.text = str(new_memory)
+            
+            # Convertir l'arbre XML modifié en chaîne de caractères pour le POST
+            new_config_xml = ET.tostring(root, encoding='utf-8', method='xml')
+            
+            # Poster la nouvelle configuration avec la RAM incrémentée
+            post_url = f"{url_base}{master_name}/config.xml"
+            headers = {'Content-Type': 'application/xml'}
+            post_response = requests.post(post_url, auth=HTTPBasicAuth(username, api_token), headers=headers, data=new_config_xml, verify=False)
+            
+            if post_response.status_code == 200:
+                print(f"RAM mise à jour avec succès pour {master_name}")
+            else:
+                print(f"Erreur lors de la mise à jour de la RAM pour {master_name}: {post_response.status_code}")
         else:
-            print(f"Erreur lors de la mise à jour de la RAM pour {master_name}: {post_response.status_code}")
+            print(f"Aucune mémoire trouvée pour {master_name}")
     else:
         print(f"Erreur lors de la récupération de la configuration pour {master_name}: {response.status_code}")
 
