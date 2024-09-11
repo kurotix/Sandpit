@@ -1,71 +1,41 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import xml.etree.ElementTree as ET
 
-# Informations Jenkins
-jenkins_url = "https://jenkins.echonet/cjoc/job/"
+# Liste des masters à mettre à jour avec leurs valeurs de RAM actuelles
+masters = ["Ilyes", "Nassim", "Lina"]
+url_base = "https://jenkins.echonet/cjoc/job/"
 username = "votre_nom_d_utilisateur"
 api_token = "votre_token_api"
 
-# Liste des masters
-masters = ["Ilyes", "Nassim", "Lina"]
-
-# Fonction pour récupérer la RAM actuelle
-def get_current_memory(master_name):
-    # URL de la page de configuration XML du master
-    config_url = f"{jenkins_url}{master_name}/config.xml"
+# Fonction pour incrémenter la RAM de +2 Go
+def increment_ram(master_name):
+    url = f"{url_base}{master_name}/configure"
     
-    # Faire la requête GET pour récupérer la configuration actuelle
-    response = requests.get(config_url, auth=HTTPBasicAuth(username, api_token))
-
-    # Vérification de succès de la requête
+    # Effectuer une requête GET pour obtenir la configuration actuelle (bypass SSL avec verify=False)
+    response = requests.get(url, auth=HTTPBasicAuth(username, api_token), verify=False)
+    
     if response.status_code == 200:
-        # Parsing du fichier XML pour récupérer la mémoire actuelle
-        xml_content = response.content
-        root = ET.fromstring(xml_content)
+        # Simuler la récupération de la RAM actuelle à partir de la page HTML/JSON (mettre à jour selon votre besoin)
+        # Ceci est un exemple simplifié, dans un vrai scénario, vous devrez probablement parser le HTML ou JSON de la réponse.
+        print(f"RAM actuelle pour {master_name} : 4096 MB (exemple)")
         
-        # Localiser l'élément XML qui contient la RAM (vous devez vérifier la structure XML exacte)
-        memory_element = root.find(".//jenkinsMasterMemoryMB")
-        if memory_element is not None:
-            current_memory = int(memory_element.text)
-            return current_memory
+        # Incrémenter de +2048 MB
+        new_ram_value = 4096 + 2048
+        print(f"Nouvelle RAM pour {master_name} : {new_ram_value} MB")
+        
+        # Poster la nouvelle configuration avec la RAM incrémentée (ici un exemple d'envoi POST)
+        data = {
+            'ram': new_ram_value  # Modifier la clé et les données selon la structure exacte du formulaire
+        }
+        post_response = requests.post(url, auth=HTTPBasicAuth(username, api_token), data=data, verify=False)
+        
+        if post_response.status_code == 200:
+            print(f"RAM mise à jour avec succès pour {master_name}")
         else:
-            print(f"Erreur : Champ de RAM non trouvé pour {master_name}.")
-            return None
+            print(f"Erreur lors de la mise à jour de la RAM pour {master_name}: {post_response.status_code}")
     else:
-        print(f"Erreur lors de la récupération de la configuration pour {master_name}. Status code: {response.status_code}")
-        return None
+        print(f"Erreur lors de la récupération de la configuration pour {master_name}: {response.status_code}")
 
-# Fonction pour modifier la RAM d'un master
-def update_master_memory(master_name, current_memory):
-    # URL de la page de configuration du master
-    configure_url = f"{jenkins_url}{master_name}/config.xml"
-
-    # Calcul de la nouvelle RAM (ajout de 2 Go)
-    new_memory = current_memory + 2048
-
-    # Préparer les données XML mises à jour
-    payload = f'''
-    <jenkinsMasterMemoryMB>{new_memory}</jenkinsMasterMemoryMB>
-    '''
-
-    # Faire la requête POST pour mettre à jour la configuration
-    headers = {'Content-Type': 'application/xml'}
-    response = requests.post(configure_url, data=payload, headers=headers, auth=HTTPBasicAuth(username, api_token))
-
-    # Vérification du succès de la requête
-    if response.status_code == 200:
-        print(f"La RAM du master {master_name} a été mise à jour avec succès à {new_memory} MB.")
-    else:
-        print(f"Erreur lors de la mise à jour du master {master_name}. Status code: {response.status_code}")
-
-# Boucle sur chaque master pour récupérer et mettre à jour la RAM
+# Incrémenter la RAM pour chaque master dans la liste
 for master in masters:
-    print(f"Traitement du master {master}...")
-
-    # Récupérer la mémoire actuelle
-    current_memory = get_current_memory(master)
-
-    if current_memory is not None:
-        # Mettre à jour la mémoire en ajoutant 2 Go
-        update_master_memory(master, current_memory)
+    increment_ram(master)
