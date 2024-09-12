@@ -1,8 +1,29 @@
-// Accéder à tous les jobs en pending sur l'instance Jenkins
-Jenkins.instance.queue.items.each { queueItem ->
-    // Si l'item est en pending, l'annuler
-    println("Annulation du job : " + queueItem.task.name)
-    Jenkins.instance.queue.cancel(queueItem.task)
-}
+// Définir la durée en millisecondes (30 minutes = 30 * 60 * 1000)
+long thirtyMinutesInMillis = 30 * 60 * 1000
 
-println("Tous les jobs en pending ont été annulés.")
+// Obtenir l'heure actuelle
+long currentTime = System.currentTimeMillis()
+
+// Parcours de la file d'attente pour annuler les jobs en pending
+Jenkins.instance.queue.items.each { queueItem ->
+    long timeInQueue = currentTime - queueItem.inQueueSince
+    
+    // Vérifie si le job est en pending depuis au moins 30 minutes
+    if (timeInQueue >= thirtyMinutesInMillis) {
+        println "Le job en attente depuis plus de 30 minutes : ${queueItem.task.name}"
+        
+        // Annule le job en pending
+        Jenkins.instance.queue.cancel(queueItem)
+        
+        // Suppression du job si possible
+        def job = queueItem.task
+        if (job instanceof hudson.model.Job) {
+            println "Suppression du job : ${job.fullDisplayName}"
+            job.delete()  // Supprime le job
+        } else {
+            println "Le job ${job.fullDisplayName} ne peut pas être supprimé."
+        }
+    } else {
+        println "Le job ${queueItem.task.name} est en attente depuis moins de 30 minutes."
+    }
+}
