@@ -1,0 +1,8 @@
+// Accéder à tous les jobs en pending sur l'instance Jenkins
+Jenkins.instance.queue.items.each { queueItem ->
+    // Si l'item est en pending, l'annuler
+    println("Annulation du job : " + queueItem.task.name)
+    Jenkins.instance.queue.cancel(queueItem.task)
+}
+
+println("Tous les jobs en pending ont été annulés.")
